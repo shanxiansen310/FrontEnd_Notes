@@ -98,7 +98,29 @@ rl.on('line',function(line){
 
 
 
+#### 6.while(i--)循环问题
 
+```js
+let i=4;
+while (i--){
+ console.log(i);
+}
+console.log(i);
+//3 2 1 0 
+//-1
+```
+
+while先对条件语句进行判断, 这里是i, 也就是先对i进行判断, i=4为truthy, 那么才会继续执行i--，再继续执行下面的语句，也就是说真正的执行顺序是：
+
+1. 判断i是否为真值
+2. 执行条件语句i--后i=3 
+3. 执行while循环体内的语句
+
+💣<span style="font-weight:bold; color:red;">注意:不论i是否为真值都会执行i--</span> ,  也就是说在最后i为0时, while循环体内的语句不再执行, 但条件语句i--还是会执行。因此 i 最后的值为 -1 ！
+
+
+
+同理 while(i-->0) 也是一个道理, 先判断i是否大于0, 再进行 i-=1 
 
 
 

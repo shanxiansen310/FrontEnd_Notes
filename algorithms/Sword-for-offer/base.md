@@ -5344,6 +5344,21 @@ module.exports = {
 
 
 
+🚩这里提供一种新的merge，看上去更简洁 !
+
+```js
+const merge = (nums1, nums2) => {
+    let p1 = p2 = 0, r = [], len1 = nums1.length, len2 = nums2.length
+    while (p1 < len1 || p2 < len2) {
+        if (p2 >= len2 || nums1[p1] > nums2[p2]) r.push(nums1[p1++]) // p2越界放p1
+        else r.push(nums2[p2++])
+    }
+    return r 
+}
+```
+
+
+
 
 
 
