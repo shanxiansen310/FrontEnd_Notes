@@ -1,3 +1,5 @@
+[standards / javascript - 工蜂内网版 (woa.com)](https://git.woa.com/standards/javascript)
+
 # JavaScript 编码规范
 
 [TOC]
@@ -130,9 +132,9 @@ stages:
   ```javascript
   const foo = [1, 2];
   const bar = foo;
-
+  
   bar[0] = 9;
-
+  
   console.log(foo[0], bar[0]); // => 9, 9
   ```
 
@@ -334,15 +336,15 @@ stages:
   const original = { a: 1, b: 2 };
   const copy = Object.assign(original, { c: 3 }); // 变异的 `original` ಠ_ಠ
   delete copy.a; // 这....
-
+  
   // bad
   const original = { a: 1, b: 2 };
   const copy = Object.assign({}, original, { c: 3 }); // copy => { a: 1, b: 2, c: 3 }
-
+  
   // good
   const original = { a: 1, b: 2 };
   const copy = { ...original, c: 3 }; // copy => { a: 1, b: 2, c: 3 }
-
+  
   const { a, ...noA } = copy; // noA => { b: 2, c: 3 }
   ```
 
@@ -473,20 +475,20 @@ stages:
   const arr = [
     [0, 1], [2, 3], [4, 5],
   ];
-
+  
   const objectInArray = [{
     id: 1,
   }, {
     id: 2,
   }];
-
+  
   const numberInArray = [
     1, 2,
   ];
-
+  
   // good
   const arr = [[0, 1], [2, 3], [4, 5]];
-
+  
   const objectInArray = [
     {
       id: 1,
@@ -495,7 +497,7 @@ stages:
       id: 2,
     },
   ];
-
+  
   const numberInArray = [
     1,
     2,
@@ -552,16 +554,16 @@ stages:
     // 处理代码...
     return [left, right, top, bottom];
   }
-
+  
   // 调用者需要考虑返回数据的顺序。
   const [left, __, top] = processInput(input);
-
+  
   // good
   function processInput(input) {
     // 处理代码...
     return { left, right, top, bottom };
   }
-
+  
   // 调用者只选择他们需要的数据。
   const { left, top } = processInput(input);
   ```
@@ -636,7 +638,7 @@ stages:
   ```javascript
   // bad
   const foo = '\'this\' \i\s \"quoted\"';
-
+  
   // good
   const foo = '\'this\' is "quoted"';
   const foo = `my name is '${name}'`;
@@ -883,7 +885,7 @@ stages:
                 quux) {
     // ...
   }
-
+  
   // good
   function foo(
     bar,
@@ -892,12 +894,12 @@ stages:
   ) {
     // ...
   }
-
+  
   // bad
   console.log(foo,
     bar,
     baz);
-
+  
   // good
   console.log(
     foo,
@@ -1047,10 +1049,10 @@ stages:
   // bad
   (foo) =>
     bar;
-
+  
   (foo) =>
     (bar);
-
+  
   // good
   (foo) => bar;
   (foo) => (bar);
@@ -1270,10 +1272,10 @@ stages:
   import foo from 'foo';
   // … 其他导入 … //
   import { named1, named2 } from 'foo';
-
+     
   // good
   import foo, { named1, named2 } from 'foo';
-
+     
   // good
   import foo, {
     named1,
@@ -1290,7 +1292,7 @@ stages:
   // bad
   let foo = 3;
   export { foo };
-
+     
   // good
   const foo = 3;
   export { foo };
@@ -1304,7 +1306,7 @@ stages:
   ```javascript
   // bad
   export function foo() {}
-
+     
   // good
   export default function foo() {}
   ```
@@ -1318,13 +1320,13 @@ stages:
   // bad
   import foo from 'foo';
   foo.init();
-
+     
   import bar from 'bar';
-
+     
   // good
   import foo from 'foo';
   import bar from 'bar';
-
+     
   foo.init();
   ```
 
@@ -1355,7 +1357,7 @@ stages:
   // bad
   import fooSass from 'css!sass!foo.scss';
   import barCss from 'style!css!bar.css';
-
+  
   // good
   import fooSass from 'foo.scss';
   import barCss from 'bar.css';
@@ -1419,51 +1421,51 @@ stages:
   function * foo() {
     // ...
   }
-
+  
   // bad
   const bar = function * () {
     // ...
   };
-
+  
   // bad
   const baz = function *() {
     // ...
   };
-
+  
   // bad
   const quux = function*() {
     // ...
   };
-
+  
   // bad
   function*foo() {
     // ...
   }
-
+  
   // bad
   function *foo() {
     // ...
   }
-
+  
   // very bad
   function
   *
   foo() {
     // ...
   }
-
+  
   // very bad
   const wat = function
   *
   () {
     // ...
   };
-
+  
   // good
   function* foo() {
     // ...
   }
-
+  
   // good
   const foo = function* () {
     // ...
@@ -1507,7 +1509,7 @@ stages:
   ```javascript
   // bad
   const binary = Math.pow(2, 10);
-
+  
   // good
   const binary = 2 ** 10;
   ```
@@ -1799,30 +1801,30 @@ stages:
   ```javascript
   // bad
   let some_unused_var = 42;
-
+  
   // bad，定义了变量不意味着就是使用了
   let y = 10;
   y = 5;
-
+  
   // bad，对自身的操作并不意味着使用了
   let z = 0;
   z = z + 1;
-
+  
   // bad, 未使用的函数参数
   function getX(x, y) {
       return x;
   }
-
+  
   // good
   function getXPlusY(x, y) {
     return x + y;
   }
-
+  
   let x = 1;
   let y = a + 2;
-
+  
   alert(getXPlusY(x, y));
-
+  
   /**
   * 有时候我们想要提取某个对象排除了某个属性外的其他属性，会用 rest 参数解构对象
   * 这时候 type 虽然未使用，但是仍然被定义和赋值，这也是一种空间的浪费
@@ -1929,7 +1931,7 @@ stages:
   function example() {
     // => Flying
     superPower();
-
+  
     function superPower() {
       console.log('Flying');
     }
@@ -2105,29 +2107,29 @@ stages:
   ```javascript
   // bad
   const foo = a && b < 0 || c > 0 || d + 1 === 0;
-
+  
   // bad
   const bar = a ** b - 5 % d;
-
+  
   // bad, 可能陷入一种 (a || b) && c 的思考
   if (a || b && c) {
     return d;
   }
-
+  
   // bad
   const bar1 = a + b / c * (d / e);
-
+  
   // good
   const foo = (a && b < 0) || (c > 0) || (d + 1 === 0);
-
+  
   // good
   const bar = (a ** b) - (5 % d);
-
+  
   // good
   if (a || (b && c)) {
     return d;
   }
-
+  
   // good
   const bar1 = a + (b / c) * (d / e);
   ```
@@ -2198,7 +2200,7 @@ stages:
       return y;
     }
   }
-
+  
   // bad
   function cats() {
     if (x) {
@@ -2207,7 +2209,7 @@ stages:
       return y;
     }
   }
-
+  
   // bad
   function dogs() {
     if (x) {
@@ -2218,27 +2220,27 @@ stages:
       }
     }
   }
-
+  
   // good
   function foo() {
     if (x) {
       return x;
     }
-
+  
     return y;
   }
-
+  
   // good
   function cats() {
     if (x) {
       return x;
     }
-
+  
     if (y) {
       return y;
     }
   }
-
+  
   // good
   function dogs(x) {
     if (x) {
@@ -2311,7 +2313,7 @@ stages:
   ```javascript
   // bad
   !isRunning && startRunning();
-
+  
   // good
   if (!isRunning) {
     startRunning();
@@ -2578,7 +2580,7 @@ stages:
   ```javascript
   // bad
   $('#items').find('.selected').highlight().end().find('.open').updateCount();
-
+  
   // bad
   $('#items').
     find('.selected').
@@ -2586,7 +2588,7 @@ stages:
       end().
     find('.open').
       updateCount();
-
+  
   // good
   $('#items')
     .find('.selected')
@@ -2594,13 +2596,13 @@ stages:
       .end()
     .find('.open')
       .updateCount();
-
+  
   // bad
   const leds = stage.selectAll('.led').data(data).enter().append('svg:svg').classed('led', true)
       .attr('width', (radius + margin) * 2).append('svg:g')
       .attr('transform', `translate(${radius + margin},${radius + margin})`)
       .call(tron.led);
-
+  
   // good
   const leds = stage.selectAll('.led')
       .data(data)
@@ -2610,7 +2612,7 @@ stages:
     .append('svg:g')
       .attr('transform', `translate(${radius + margin},${radius + margin})`)
       .call(tron.led);
-
+  
   // good
   const leds = stage.selectAll('.led').data(data);
   ```
@@ -2758,7 +2760,7 @@ stages:
       const age = getAge(today, birthday);
       this.age = age;
     }
-
+    
     getAge(today, birthday) {
       // ..
     }
@@ -2970,7 +2972,7 @@ stages:
   +    lastName: 'Nightingale',
   +    inventorOf: ['coxcomb chart', 'modern nursing']
   };
-
+  
   // good - 有尾随逗号的 git 差异
   const hero = {
         firstName: 'Florence',
@@ -2985,23 +2987,23 @@ stages:
     firstName: 'Dana',
     lastName: 'Scully'
   };
-
+  
   const heroes = [
     'Batman',
     'Superman'
   ];
-
+  
   // good
   const hero = {
     firstName: 'Dana',
     lastName: 'Scully',
   };
-
+  
   const heroes = [
     'Batman',
     'Superman',
   ];
-
+  
   // bad
   function createHero(
     firstName,
@@ -3010,7 +3012,7 @@ stages:
   ) {
     // does nothing
   }
-
+  
   // good
   function createHero(
     firstName,
@@ -3019,7 +3021,7 @@ stages:
   ) {
     // does nothing
   }
-
+  
   // good (注意逗号不能出现在 "rest" 元素后边)
   function createHero(
     firstName,
@@ -3029,21 +3031,21 @@ stages:
   ) {
     // does nothing
   }
-
+  
   // bad
   createHero(
     firstName,
     lastName,
     inventorOf
   );
-
+  
   // good
   createHero(
     firstName,
     lastName,
     inventorOf,
   );
-
+  
   // good (注意逗号不能出现在 "rest" 元素后边)
   createHero(
     firstName,
@@ -3100,16 +3102,16 @@ stages:
   ```javascript
   // bad
   $('ul', '.sidebar').hide();
-
+  
   // bad
   $('.sidebar').find('ul').hide();
-
+  
   // good
   $('.sidebar ul').hide();
-
+  
   // good
   $('.sidebar > ul').hide();
-
+  
   // good
   $sidebar.find('ul').hide();
   ```
@@ -3181,13 +3183,13 @@ stages:
 
   ```javascript
   const age = 0;
-
+  
   // bad
   const hasAge = new Boolean(age);
-
+  
   // good
   const hasAge = Boolean(age);
-
+  
   // best
   const hasAge = !!age;
   ```
@@ -3202,7 +3204,7 @@ stages:
   function q() {
     // ...
   }
-
+  
   // good
   function query() {
     // ...
@@ -3387,28 +3389,28 @@ stages:
   ```javascript
   // bad
   const PRIVATE_VARIABLE = 'should not be unnecessarily uppercased within a file';
-
+  
   // bad
   export const THING_TO_BE_CHANGED = 'should obviously not be uppercased';
-
+  
   // bad
   export let REASSIGNABLE_VARIABLE = 'do not use let with uppercase variables';
-
+  
   // ---
-
+  
   // 允许，但是不提供语义值
   export const apiKey = 'SOMEKEY';
-
+  
   // 多数情况下，很好
   export const API_KEY = 'SOMEKEY';
-
+  
   // ---
-
+  
   // bad - 不必要大写 key 没有增加语义值
   export const MAPPING = {
     KEY: 'value'
   };
-
+  
   // good
   export const MAPPING = {
     key: 'value'
@@ -3467,11 +3469,11 @@ stages:
       const lightsaber = options.lightsaber || 'blue';
       this.set('lightsaber', lightsaber);
     }
-
+  
     set(key, val) {
       this[key] = val;
     }
-
+  
     get(key) {
       return this[key];
     }
@@ -3485,9 +3487,9 @@ stages:
   ```javascript
   // bad
   $(this).trigger('listingUpdated', listing.id);
-
+  
   // ...
-
+  
   $(this).on('listingUpdated', (e, listingID) => {
     // do something with listingID
   });
@@ -3496,9 +3498,9 @@ stages:
   ```javascript
   // good
   $(this).trigger('listingUpdated', { listingID: listing.id });
-
+  
   // ...
-
+  
   $(this).on('listingUpdated', (e, data) => {
     // do something with data.listingID
   });
@@ -3517,34 +3519,34 @@ stages:
     jedis[name] = true
     return true
   })
-
+  
   // bad - 可能异常
   const reaction = "No! That's impossible!"
   (async function meanwhileOnTheFalcon() {
     // handle `leia`, `lando`, `chewie`, `r2`, `c3p0`
     // ...
   }())
-
+  
   // bad - 返回 `undefined` 而不是下一行的值 - 当 `return` 单独一行的时候 ASI 总是会发生
   function foo() {
     return
       'search your feelings, you know it to be foo'
   }
-
+  
   // good
   const jedis = {};
   ['luke', 'leia'].some((name) => {
     jedis[name] = true;
     return true;
   });
-
+  
   // good
   const reaction = "No! That's impossible!";
   (async function meanwhileOnTheFalcon() {
     // handle `leia`, `lando`, `chewie`, `r2`, `c3p0`
     // ...
   }());
-
+  
   // good
   function foo() {
     return 'search your feelings, you know it to be foo';
@@ -3569,13 +3571,12 @@ class Foo1 {
 class Foo2 {
     public readonly bar = 1;
 }
- ```
+  ```
 
 [1.2](#explicit-member-accessibility) **【可选】** 必须设置类的成员的可访问性
 >原因？
 >1、将不需要公开的成员设为私有的，可以增强代码的可理解性，对文档输出也很友好
 >2、将暴露出去的设置为public的，类和外界的联系一目了然
->
 
   ```javascript
   //bad
@@ -3611,7 +3612,7 @@ class Foo2 {
         console.log(value);
     }
 }
- ```
+  ```
 
 
 [1.3](#member-ordering) **【必须】** 指定类成员的排序规则
@@ -3770,7 +3771,7 @@ interface IFoo2 {
     foo(sn: string | number): void;
     bar(): void;
 }
- ```
+  ```
 
 
 
@@ -3789,7 +3790,7 @@ function foo2(x: number | string): void;
 function foo2(x: any): any {
     return x;
 }
- ```
+  ```
 
 
 ## 3. 类型
@@ -3822,7 +3823,7 @@ const foo2 = bar2 as string;
 const baz2 = {
     bar: 1
 } as any;
- ```
+  ```
 
 
 [3.2](#no-inferrable-types) **【推荐】** 禁止给一个初始化时直接赋值为 number, string 的变量显式的声明类型, 可以简化代码
@@ -3855,7 +3856,7 @@ type Foo2 = {
     bar: boolean;
     baz: string;
 };
- ```
+  ```
 
 
 [3.4](#prefer-function-type) **【推荐】** 使用函数类型别名替代包含函数调用声明的接口
@@ -3868,7 +3869,7 @@ interface Foo1 {
 
 //good
 type Foo2 = () => string;
-  ```
+ ```
 
 
 ## 4. 接口
@@ -3887,7 +3888,7 @@ interface Foo2 {
     foo: string;
 }
 
- ```
+  ```
 
 
 [4.2](#method-signature-style) **【可选】** 接口中的方法必须用属性的方式定义
@@ -4025,7 +4026,7 @@ console.log(foo1 && foo1.a && foo1.a.b && foo1.a.b.c);
 //good
 let foo2: any;
 console.log(foo2?.a?.b?.c);
-  ```
+ ```
 
 
 ## 7. 导入
@@ -4118,7 +4119,7 @@ class Foo {
 }
 
 type Foo = () => {};
- ```
+  ```
 
 
 

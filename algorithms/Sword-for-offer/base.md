@@ -1,9 +1,3 @@
-
-
-
-
-
-
 # Sword-for-offer
 
 
