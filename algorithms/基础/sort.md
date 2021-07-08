@@ -80,6 +80,8 @@ const BubbleSort=(arr)=>{
 
 ### 快速排序
 
+ <img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\algorithms\基础\sort.assets\v2-fae604840f5d10a62758db7a4d830785_1440w.jpg" alt="img" style="zoom: 120%;" />
+
 ![quickSort](sort.assets\quickSort.gif)
 
 
@@ -438,6 +440,44 @@ class Heap{
 
 
 
+
+### 希尔排序
+
+
+
+```js
+const shellSort=arr=>{
+	for (let step=Math.floor(arr.length/2);step>0;step=Math.floor(step/2)){
+		for (let i=step;i<arr.length;i++){
+			let j=i;
+			let temp=arr[j];
+			// 直接插入排序
+			while (j-step>=0&&arr[j-step]>temp){
+				arr[j]=arr[j-step];
+				j=j-step;
+			}
+			arr[j]=temp;
+		}
+	}
+	return arr;
+}
+```
+
+这里只是介绍：
+
+▼示例1:
+
+<img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\algorithms\基础\sort.assets\image-20210619200848656.png" alt="image-20210619200848656" style="zoom:50%;" />
+
+<img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\algorithms\基础\sort.assets\image-20210619200917168.png" alt="image-20210619200917168" style="zoom:50%;" />
+
+
+
+
+
+▼示例2
+
+<img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\algorithms\基础\sort.assets\image-20210619201018960.png" alt="image-20210619201018960" style="zoom:70%;" />
 
 
 

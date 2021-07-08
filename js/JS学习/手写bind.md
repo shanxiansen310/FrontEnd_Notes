@@ -47,20 +47,20 @@ console.log(new bound()); //foo {b: 1}
 ```js
 /*简易版bind*/
 Function.prototype.easyBind=function (otherThis) {
-    if (typeof this!=="function") console.log("This is not callable!");
+	if (typeof this!=="function") console.log("This is not callable!");
 
-    let fToBind=this,   //fToBind表示要进行绑定的函数
-        args=Array.prototype.slice.call(arguments,1);  //这里的args是bind中的参数
-    return function () {
-        //在otherThis上调用fToBind函数
-        return fToBind.apply(otherThis,
-       args.concat(Array.prototype.slice.call(arguments)));  //这里的参数包括了bind中的和调用bound时传入的
-    }
+	let fToBind=this,   //fToBind表示要进行绑定的函数
+		args=Array.prototype.slice.call(arguments,1);  //这里的args是bind中的参数
+	return function () {
+		//在otherThis上调用fToBind函数
+		return fToBind.apply(otherThis,
+			args.concat(Array.prototype.slice.call(arguments)));  //这里的参数包括了bind中的和调用bound时传入的
+	}
 }
 
 function foo() {
-    this.b=1;
-    return this.a;
+	this.b=1;
+	return this.a;
 }
 let obj = { a: 2 };
 let bound=foo.easyBind(obj);
@@ -129,25 +129,25 @@ console.log(alice.name);    // undefined
 ```js
 /*改进后的bind*/
 Function.prototype.goodBind = function (otherThis) {
-    if (typeof this !== "function") console.log("This is not callable!");
+	if (typeof this !== "function") console.log("This is not callable!");
 
-    let fToBind = this,
-        args = Array.prototype.slice.call(arguments, 1),  //
-        fBound = function () {
-            /*检测是否由new创建*/
-            return fToBind.apply(fToBind.prototype.isPrototypeOf(this)? this:otherThis
-                , args.concat(Array.prototype.slice.call(arguments)));
-            //在MDN上采用的是记录args长度push的方法, 但我觉得concat更简洁而且不会改变原数组
-            //fToBind.prototype.isPrototypeOf(this) <==> this instanceof fToBind
-        };
+	let fToBind = this,
+		args = Array.prototype.slice.call(arguments, 1),  //
+		fBound = function () {
+			/*检测是否由new创建*/
+			return fToBind.apply(fToBind.prototype.isPrototypeOf(this)? this:otherThis
+				, args.concat(Array.prototype.slice.call(arguments)));
+			//在MDN上采用的是记录args长度push的方法, 但我觉得concat更简洁而且不会改变原数组
+			//fToBind.prototype.isPrototypeOf(this) <==> this instanceof fToBind
+		};
 
-    if (this.prototype){  /*判断this/foo有没有原型, 比如说内置函数Math.push没有原型*/
-        fBound.prototype=this.prototype;
-    }
-    return fBound;
+	if (this.prototype){ /*判断this/foo有没有原型, 比如说内置函数Math.push没有原型*/
+		fBound.prototype=this.prototype;
+	}
+	return fBound;
 }
 function foo(name) {
-    this.name = name;
+	this.name = name;
 }
 let obj = {};
 let bar = foo.goodBind(obj);
