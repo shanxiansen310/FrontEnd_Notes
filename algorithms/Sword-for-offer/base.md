@@ -23,37 +23,44 @@
 2 <= n <= 100000
 
 ```js
-var findRepeatNumber = function(nums) {
-    //way1: 哈希表  时间复杂度:O(n)  空间复杂度:O(n)
-    // let hashMap=[];
-    // for (const num of nums) {
-    //     if (!hashMap[num]){
-    //         hashMap[num]=true;
-    //     }else{
-    //         return num;
-    //     }
-    // }
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+const findRepeatNumber = function(nums){
+  //way1: 哈希表  时间复杂度:O(n)  空间复杂度:O(n)
+  // let hashMap=[];
+  // for (const num of nums) {
+  //     if (!hashMap[num]){
+  //         hashMap[num]=true;
+  //     }else{
+  //         return num;
+  //     }
+  // }
 
-    //way2 时间复杂度:O(n)  空间复杂度:O(1)
-    let key;
-    for(let i=0;i<nums.length;i++){
-        key=nums[i];
-
-        while(key!==i){
-            if(nums[key]===key){
-                return key;
-            }
-            [nums[i], nums[key]] =[nums[key],nums[i]];
-            key=nums[key];
-        }
+  //way2 时间复杂度:O(n)  空间复杂度:O(1)
+  
+  for (let i = 0; i < nums.length; i++) {
+    let val=nums[i];
+    while (val!==i){
+      if (val===nums[val]) return val;
+      [nums[i],nums[val]]=[nums[val],nums[i]];
+      //这里已经交换过了，所以要给val重新赋值nums[i]而不是nums[val]
+      val=nums[i];
     }
-
-};
+  }
+}
 ```
 
  <img src="base.assets/image-20210205001035129.png" alt="image-20210205001035129" style="zoom: 67%;" />
 
 ★主要是理解一下way2的思想, 充分利用题目中给出的性质
+
+😈这里第二种方法虽然是O(1)的空间复杂度，但是改变了数组，可以想想能够不改变数组吗？
+
+
+
+
 
 
 
@@ -109,7 +116,7 @@ var replaceSpace = function(s) {
     //return s.replace(/\s/g,"%20");
 };
 //要特别注意这个replace的用法，如果不写正则，
-    return s.replace(' ','%20');//只会替换部分
+    return s.replace(' ','%20');//只会匹配第一个空格
     return s.replace(/^\s/g,'%20'); //不能通过
     return s.replace(/^\s+/g,'%20'); //"   " 多个空格不能通过
 
@@ -180,11 +187,11 @@ var reversePrint = function(head) {
 }*/
 function printListFromTailToHead(head)
 {
-    if(!head) return [];
-    return printListFromTailToHead(head.next).concat([head.val]);
+  if(!head) return [];
+  return printListFromTailToHead(head.next).concat([head.val]);
 }
 module.exports = {
-    printListFromTailToHead : printListFromTailToHead
+  printListFromTailToHead : printListFromTailToHead
 };
 ```
 
@@ -341,6 +348,45 @@ module.exports = {
 
 
 
+😈TS改写
+
+```ts
+/**
+ * @param {number[]} preorder
+ * @param {number[]} inorder
+ * @return {TreeNode}
+ */
+
+class TreeNode {
+  val: number
+  left: TreeNode | null
+  right: TreeNode | null
+
+  constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+    this.val = val ?? 0
+    this.left = left ?? null
+    this.right = right ?? null
+  }
+}
+
+const buildTree = function (preOrder: number[], inOrder: number[]): TreeNode | null {
+  const dfs = (preStart: number, inStart: number, inEnd: number): TreeNode | null => {
+    if (inStart>inEnd) return null;
+    const val=preOrder[preStart];
+    const node=new TreeNode(val);
+    const index=inOrder.indexOf(val);
+    node.left=dfs(preStart+1,inStart,index-1);
+    node.right=dfs(preStart+index-inStart+1,index+1,inEnd);
+    return node;
+  }
+  return dfs(0,0,preOrder.length-1);
+}
+```
+
+ <img src="base.assets/image-20210713103332714.png" alt="image-20210713103332714" style="zoom:50%;" />
+
+
+
 
 
 #### [剑指 Offer 09. 用两个栈实现队列](https://leetcode-cn.com/problems/yong-liang-ge-zhan-shi-xian-dui-lie-lcof/)
@@ -370,32 +416,32 @@ module.exports = {
 
 ```js
 var CQueue = function () {
-    this.statck1 = [];
-    this.statck2 = []
+  this.statck1 = [];
+  this.statck2 = []
 };
 
-/** 
+/**
  * @param {number} value
  * @return {void}
  */
 CQueue.prototype.appendTail = function (value) {
-    this.statck1.push(value)
-    return null
+  this.statck1.push(value)
+  return null
 };
 
 /**
  * @return {number}
  */
 CQueue.prototype.deleteHead = function () {
-	//如果有,则直接从当前的stack2中取
-    if(this.statck2.length){
-        return this.statck2.pop();
-    }
-    while (val = this.statck1.pop()) {
-        this.statck2.push(val)
-    }
+  //如果有,则直接从当前的stack2中取
+  if(this.statck2.length){
+    return this.statck2.pop();
+  }
+  while (val = this.statck1.pop()) {
+    this.statck2.push(val)
+  }
 
-    return this.statck2.pop()||-1;
+  return this.statck2.pop()||-1;
 };
 
 /**
@@ -405,6 +451,53 @@ CQueue.prototype.deleteHead = function () {
  * var param_2 = obj.deleteHead()
  */
 ```
+
+⚠️这边注意哦！上面  <span style='color:blue;'>return this.statck2.pop()||-1;</span> 应该是错的！因为有可能value为0。不过题目中写了value>0,但严谨一点还是不要那么写！把 || 换成 ??
+
+
+
+写一个Typescript版本：
+
+```ts
+class CQueue {
+  stack1: number[]
+  stack2: number[]
+
+  constructor() {
+    this.stack1 = []
+    this.stack2 = []
+  }
+
+  appendTail(value: number): null {
+    this.stack1.push(value);
+    return null;
+  }
+
+  deleteHead():number{
+    if (this.stack2.length){
+      return this.stack2.pop();
+    }
+    while (this.stack1.length){
+      this.stack2.push(this.stack1.pop());
+    }
+    // return this.stack2.length? this.stack2.pop():-1;
+    return  this.stack2.pop()??-1;
+  }
+
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### [剑指 Offer 10- I. 斐波那契数列](https://leetcode-cn.com/problems/fei-bo-na-qi-shu-lie-lcof/)
 

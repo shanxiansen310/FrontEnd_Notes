@@ -385,5 +385,5 @@ Object.getOwnPropertyDescriptor(res, 'field3').configurable;     //true
 
 内心os：这恐怖的压迫感再也不想有了！😭😭😭
 
-![sad2](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\js\JS学习\deepClone.assets\sad2.png)
+![sad2](deepClone.assets\sad2.png)
 
