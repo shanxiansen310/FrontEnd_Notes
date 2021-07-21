@@ -1,4 +1,4 @@
-# Sword-for-offer
+Sword-for-offer
 
 
 
@@ -489,7 +489,7 @@ class CQueue {
 
 
 
-
+🌟关键点在于每次删除的时候如果stack2为空的话需要把stack1中的值全部倒在stack2中!
 
 
 
@@ -546,7 +546,9 @@ var fib = function(n) {
 
     /*
     //这里由于n从0开始, 所以fib序列为: 0,1,1,2,3,5...
-    //在n=3之前都是已确定的,所以当n=3时才会有第一次递归。每一次递归都是一次加法，从1+1为第一次开始总共需要n-2次加法，所以n=2时就刚好可以返回最后的结果
+    //n=0、1时,前面没有两个数来凑成a+b所以直接得出。当n=2时前面终于有了两个数（0+1=1）因此可以开始递归，所以从n=2开始返回b。
+    //这里主要思想是搞清需要进行多少次加法计算！每一次递归都是一次加法，从1+1为第一次开始总共需要n-2次加法，所以n=2时就刚好可以返回最后的结果
+    //比如n=2对应[0,1,1,2,...]中的第二个1,此时需要n-2=0次加法,因此直接返回b
         function f(n,a=1,b=1){
             if(n<=1) return n;
             if(n==2) return b ;
@@ -614,6 +616,57 @@ var fib = function(n) {
 ```
 
 🌟关于 => [尾递归](D:\Study\Algorithm\Notes-Typora\Base\递归理解.md)
+
+
+
+重刷==>未取模
+
+```js
+/*最普通的版本*/
+const fib = function(n) {
+	if (n<=1) return n;
+	return fib(n-1)+fib(n-2);
+}
+
+/*尾递归*/
+const fib = n => {
+	const recur = (n, a = 1, b = 1) => {
+		if (n <= 1) return n;
+		else if (n === 2) return b;
+		return recur(n - 1, b, a + b)
+	}
+	return recur(n)
+}
+
+/*动态规划+尾递归*/
+const fib=n=>{
+	const dp=[0,1];
+	const recur=n=>{
+		if (dp[n]!==undefined){
+			return dp[n]
+		}
+		dp[n]=recur(n-1)+recur(n-2);
+		return dp[n]
+	}
+	return recur(n);
+}
+
+/*循环解决*/
+const fib=n=>{
+	if (n<=1) return n;
+	let a=1,b=1;
+	for (let i = 2; i < n; i++) {
+		[a,b]=[b,a+b]
+	}
+	return b;
+}
+```
+
+❗一定要注意在递归中需要  <span style=" color:red;">return</span> !
+
+
+
+
 
 
 
@@ -810,30 +863,29 @@ module.exports = {
 
 
 
-#### 剑指 Offer 11. 旋转数组的最小数字
+#### [剑指 Offer 11. 旋转数组的最小数字](https://leetcode-cn.com/problems/xuan-zhuan-shu-zu-de-zui-xiao-shu-zi-lcof/)
 
 把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。输入一个递增排序
 的数组的一个旋转，输出旋转数组的最小元素。
 例如，数组 [3,4,5,1,2] 为 [1,2,3,4,5] 的一个旋转，该数组的最小值为1。
 
 示例 1：
-
 输入：[3,4,5,1,2]
 输出：1
-示例 2：
 
+示例 2：
 输入：[2,2,2,0,1]
 输出：0
 
 ```javascript
 /*最好别用!!! 直接遍历, 复杂度为O(n)*/
-var minArray = function(numbers) {
-    for(let i=0;i<numbers.length-1;i++){
-        if(numbers[i]>numbers[i+1]){
-            return numbers[i+1]
-        }
-    }
-    return numbers[0];
+const minArray = function(numbers) {
+	for(let i=0;i<numbers.length-1;i++){
+		if(numbers[i]>numbers[i+1]){
+			return numbers[i+1]
+		}
+	}
+	return numbers[0];
 };
 ```
 
@@ -842,9 +894,9 @@ var minArray = function(numbers) {
 **二分查找**
 
 复杂度分析：
-时间复杂度:O(logn) 在特例情况下（例如 [1,1,1,1]），会退化到 O(N)。
+**时间复杂度:O(logn)** 在特例情况下（例如 [1,1,1,1]），会退化到 O(N)。
 
-空间复杂度: O(1)
+**空间复杂度: O(1)**
 
  <img src="base.assets/image-20210207194533352.png" alt="image-20210207194533352" style="zoom: 80%;" />
 
@@ -927,6 +979,42 @@ module.exports = {
 ▼但这里并不好!!!   其实这就应该是按照二分法进行查找的!!  如果变成这样反而会降低效率, 而且在前面也说了 如果是正序排列的情况下, 这种判断方法就会出错!!!  比如 1 2 3 4 5 最后会得到5, 因此重刷时自己写的并不好!
 
 🌟还是采用原来的
+
+
+
+
+
+**三刷：**
+
+```js
+// 1 2 3 4 5
+// 3 4 5 1 2
+// 5 1 2 3 4
+// 4 5 1 2 3
+const minArray = function(numbers) {
+	let left=0,right=numbers.length-1,mid=0;
+	while (left<right){
+		mid=(left+right)>>1;
+		if (numbers[mid]<numbers[right]){
+			right=mid;
+		}else if (numbers[mid]>numbers[right]){
+			left=mid+1;
+		}else {
+			right--;
+		}
+	}
+	return numbers[left]
+};
+```
+
+**❗注意几个问题：**
+
+1. while条件是  $left<right$ 还是 $left<=right$
+2. $right=mid$ 而 $left=mid+1$, 这是因为当  <span style="color:blue;">numbers[mid]<numbers[right]</span> 时mid位置的数可能是最小的, 因此要保留。而  <span style="color:blue;">numbers[mid]》numbers[right]</span> 时mid位置的数肯定不是最小的，因此需要加1
+3. 比较的是right，而且相等时需要 $right--$
+4. 最后返回的是 $numbers[left]$ 或者 $numbers[right]$ ! 而不是mid, 因为最后left=right时才求出了最小值的位置!
+
+
 
 
 
@@ -1023,6 +1111,42 @@ var exist = function(board, word) {
 ```
 
 🔴思路: 递归错误条件判断=>递归正确条件判断 => 向四个方向进行检查
+
+
+
+**★剑指重刷:**
+
+```js
+/**
+ * @param {string[][]} board
+ * @param {string} word
+ * @return {boolean}
+ */
+const exist = function(board, word) {
+	const len1=board.length,len2=board[0].length;
+	const dfs=(i,j,k)=>{
+		if(i<0||i>=len1||j<0||j>=len2||board[i][j]!==word[k]){
+			return false;
+		}
+		if (word.length-1===k) return true;
+		board[i][j]=undefined;
+		const result=dfs(i+1,j,k+1) || dfs(i-1,j,k+1) || dfs(i,j+1,k+1) || dfs(i,j-1,k+1);
+		board[i][j]=word[k];
+		return result;
+	}
+
+	for (let i=0;i<board.length;i++){
+		for (let j=0;j<board[0].length;j++){
+			if (dfs(i,j,0)) return true;
+		}
+	}
+	return false;
+}
+```
+
+🌟注意是 $i>=len1$ 而不是 $i>len1$
+
+
 
 
 
