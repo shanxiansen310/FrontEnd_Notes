@@ -709,8 +709,6 @@ ReactDOM.render(
 
 ##### 3.添加生命周期方法
 
-
-
 在具有许多组件的应用程序中，**当组件被销毁时释放所占用的资源是非常重要的**。
 
 当 `Clock` 组件第一次被渲染到 DOM 中的时候，就为其[设置一个计时器](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers/setInterval)。这在 React 中被称为“挂载（mount）”。

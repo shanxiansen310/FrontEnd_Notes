@@ -1030,7 +1030,7 @@ var exist = function(board, word) {
 
 #### 剑指 Offer 13.机器人的运动范围
 
-地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和==大于==k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
 
  
 
@@ -1046,6 +1046,8 @@ var exist = function(board, word) {
 
 1 <= n,m <= 100
 0 <= k <= 20
+
+
 
 **类似于前面的矩阵路径,但这里加上了一些限制条件**
 
@@ -1068,42 +1070,53 @@ var exist = function(board, word) {
  * @param {number} k
  * @return {number}
  */
-let movingCount=function (m,n,k){
-    /*计算位数之和*/
-    let bitSum=(x)=>{
-        let res=0;
-        while (x){
-            res=res+(x%10);
-            x=Math.floor(x/10);
-        }
-        return res;
+const movingCount=function (m,n,k){
+  /*计算位数之和*/
+  const bitSum=(x)=>{
+    let res=0;
+    while (x){
+      res=res+(x%10);
+      x=Math.floor(x/10);
     }
-    /*也可以这么写,时间上会更快,但只适用于小于100的数*/
-    let sum=x=>x%10+Math.floor(x/10);
+    return res;
+  }
+  /*也可以这么写,时间上会更快,但只适用于小于100的数*/
+  const sum=x=>x%10+Math.floor(x/10);
 
-    let flag=[];  /*记录当前位置是否满足条件*/
+  let flag=[];  /*记录当前位置是否满足条件*/
 
-    function dfs(i,j){
-        if (i<0||i>m-1||j<0||j>n-1||flag[i*n+j]===true
-        || (sum(i)+sum(j)>k)){
-            return ;
-        }
-        /*表示符合条件,可以访问到*/
-        flag[i*n+j]=true;
-        dfs(i+1,j);
-        dfs(i-1,j);   //可以删掉
-        dfs(i,j+1);
-        dfs(i,j-1);   //可以删掉
+  const dfs=(i,j)=>{
+    if (i<0||i>m-1||j<0||j>n-1||flag[i*n+j]===true
+      || (sum(i)+sum(j)>k)){
+      return ;
     }
-    dfs(0,0);
-    /*过滤器*/
-    return flag.filter(item=>item===true).length;
+    /*表示符合条件,可以访问到*/
+    flag[i*n+j]=true;
+    dfs(i+1,j);
+    dfs(i-1,j);   //可以删掉
+    dfs(i,j+1);
+    dfs(i,j-1);   //可以删掉
+  }
+  dfs(0,0);
+  /*过滤器*/
+  return flag.filter(item=>item===true).length;
 }
 ```
 
 1. 采用了最简单的箭头函数的表达形式来计算位数和, 并且根据范围进行了精简
 2. 采用flag来记录能够访问到的元素坐标, 在js中二维数组的创建十分麻烦, 于是在这里我们可以利用一维数组的方法来存储二维数组, 十分巧妙 flag[i*n+j]
 3. js中的过滤器方法, 通过过滤后直接计算可以到达的格子数
+
+
+
+⭐️这里的flag有两个作用：
+
+1. 记录是否被访问到了，如果已被访问则不再访问
+2. 最后记录可以到达的格子个数
+
+
+
+
 
 **★更快一点 ** :
 
