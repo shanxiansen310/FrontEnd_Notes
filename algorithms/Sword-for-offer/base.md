@@ -1249,7 +1249,7 @@ const movingCount=function (m,n,k){
 三角形内部： 全部连通，易证；
 两三角形连通处： 若某三角形内的解为可达解，则必与其左边或上边的三角形连通（即相交），即机器人必可从左边或上边走进此三角形。
 
-<img src="C:\Users\shanxiansen310\AppData\Roaming\Typora\typora-user-images\image-20201226110054123.png" alt="image-20201226110054123" style="zoom: 67%;" />
+![Picture9.png](base.assets/1603024999-XMpudY-Picture9.png)
 
 因此我们可以根据这个特性直接去掉向上和向左的递归
 
@@ -1426,7 +1426,7 @@ var movingCount = function(m, n, k) {
 
 数学方法:
 
-![image-20201227094050023](C:\Users\shanxiansen310\AppData\Roaming\Typora\typora-user-images\image-20201227094050023.png)
+![image-20210721095118199](base.assets/image-20210721095118199.png)
 
 
 
@@ -1445,23 +1445,31 @@ var movingCount = function(m, n, k) {
  * @param {number} n
  * @return {number}
  */
-var cuttingRope = function(n) {
-    //m<n,每次分为3的时候能取得最大值(数学推导)
-    if(n<=3){
-        return n-1;
-    }
-    let quo=Math.floor(n/3),re=n%3;
-    if (re===0){
-        return Math.pow(3,quo);
-    }
-    //2*2 > 1*3  ,所以这里退一个3出来凑成 1*3 
-    else if(re===1){
-        return Math.pow(3,quo-1)*4;
-    }
-    else
-        return Math.pow(3,quo)*2;
+const cuttingRope = function(n) {
+  //m<n,每次分为3的时候能取得最大值(数学推导)
+  if(n<=3){
+    return n-1;
+  }
+  const quo=Math.floor(n/3),re=n%3;
+  if (re===0){
+    return Math.pow(3,quo);
+  }
+  //2*2 > 1*3  ,所以这里退一个3出来凑成 1*3
+  else if(re===1){
+    return Math.pow(3,quo-1)*4;
+  }
+  else
+    return Math.pow(3,quo)*2;
 };
 ```
+
+
+
+⚠️还需要考虑 余数！ 在余数为1时，采用 2\*2 比 3\*1 更好
+
+
+
+
 
 **▼动态规划**
 
@@ -1469,7 +1477,7 @@ var cuttingRope = function(n) {
 
 **状态定义**：dp[i]:表示长度为i的剪短后的最大乘积; 
 **初始状态**：dp[2] = 1;  
-**状态转移方程**：dp[i] = Math.max(dp[i], Math.max(j * dp[i-j], j * (i - j))); 其中 1<j<i  
+**状态转移方程**：$dp[i] = Math.max(dp[i], Math.max(j * dp[i-j], j * (i - j)));$ 其中 1<j<i  
 **返回值**：dp[n]
 
 
@@ -1485,20 +1493,32 @@ var cuttingRope = function(n) {
    (dp[i-j]就是如果要继续划分下去的最佳方案)
 
 ```js
-var cuttingRope = function(n) {
-    //dp
-    //最大长度为n,所以可以令数组长度为n+1(数组从0开始,不考虑0)
-    let dp=Array(n+1).fill(1);
-    //从2开始才能被分为两个整数
-    for (let i=3;i<=n;i++){
-        //题目有要求,必须要分成2段以上,所以j必须大于0
-        for (let j=1;j<i;j++){
-            dp[i]=Math.max(dp[i],j*(i-j),dp[i-j]*j)
-        }
+/**
+ * @param {number} n
+ * @return {number}
+ */
+const cuttingRope=n=>{
+  //dp
+  //最大长度为n,所以可以令数组长度为n+1(数组从0开始,不考虑0)
+  const dp=Array(n+1).fill(0);
+  dp[2]=1;
+  for (let i = 3; i <= n; i++) {
+    //题目有要求,必须要分成2段以上,所以j必须大于0
+    for (let j = 1; j < i-1; j++) {
+      dp[i]=Math.max(dp[i],j*(i-j),j*dp[i-j])
     }
-    return dp[n];
-};
+  }
+  return dp[n];
+}
 ```
+
+
+
+💎这里我设置的 $j$ 的范围为 $[1,i-1)$ , 因为如果 j 可以等于 i-1 那么最后会得到 j\*dp[1]，然而实际上是没有dp[1]这种情况的，而 j\*dp[1] 实际上也就是 1\*(i-1) 在最开始也会考虑到，因此可以考虑缩小范围，不过不缩小范围也能通过
+
+ <img src="base.assets/image-20210721102439249.png" alt="image-20210721102439249" style="zoom:50%;" />
+
+
 
 
 
@@ -1550,7 +1570,7 @@ var cuttingRope = function(n) {
 
 示例 1：
 
-输入：00000000000000000000000000001011
+输入：0000 0000 0000 0000 0000 00000 0001 011
 输出：3
 解释：输入的二进制串 00000000000000000000000000001011 中，共有三位为 '1'。
 
@@ -1575,7 +1595,7 @@ var cuttingRope = function(n) {
  * @return {number}
  */
 //每次利用&判断最后一位是否为1, >>>为无符号右移
-var hammingWeight = function(n) {  
+const hammingWeight = function(n) {  
     let res=0;
     while(n!==0){
         res+=(n&1);
@@ -1591,7 +1611,7 @@ var hammingWeight = function(n) {
 
 
 
-★解法②: 利用n&n-1
+★解法②: 利用 n&n-1
 
 ![image-20201228115855144](base.assets\image-20201228115855144.png)
 
@@ -1696,6 +1716,32 @@ var myPow = function(x, n) {
 
 
 
+```js
+const myPow = function(x, n){
+  const absPow=n=>{
+    if (n<=2){
+      return Math.pow(x,n);
+    }
+    if (n%2===1){
+      return Math.pow(absPow(Math.floor(n/2)),2)*x
+    }else {
+      return Math.pow(absPow(Math.floor(n/2)),2)
+    }
+  }
+
+  const res=absPow(Math.abs(n));
+  return n>=0? res:1/res;
+}
+```
+
+
+
+❗️是考虑n，幂可能为负数。而不是对x取绝对值
+
+
+
+
+
 
 
 #### [★★剑指 Offer 17. 打印从1到最大的n位数](https://leetcode-cn.com/problems/da-yin-cong-1dao-zui-da-de-nwei-shu-lcof/)
@@ -1750,6 +1796,48 @@ const printNumbers = function(n){
     return res.map(Number);
 }
 ```
+
+
+
+```js
+const printNumbers = function(n){
+  if (n<=0) return [];
+  const numbers=Array(n).fill(0);
+  const res=[];
+
+  const recur=index=>{
+    if (index===n){
+      res.push(Number(numbers.join('')))
+      return
+    }
+
+    for (let i = 0; i < 10; i++) {
+      numbers[index]=i;
+      recur(index+1);
+    }
+  }
+
+  recur(0);
+  res.shift();
+  return res;
+}
+```
+
+
+
+★ 注意 if (index===n)，这里需要return！不然会一直递归下去！
+
+💎总的思想来讲就是很简单的递归，判断是否到了指定的位数停止递归！
+
+
+
+
+
+
+
+
+
+
 
 
 

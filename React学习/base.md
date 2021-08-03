@@ -2424,6 +2424,176 @@ ReactDOM.render(
 
 
 
+
+
+
+
+
+
+
+
+
+
+#### 组件生命周期
+
+参考：[React的生命周期 - 简书 (jianshu.com)](https://www.jianshu.com/p/b331d0e4b398)
+
+
+
+React的生命周期从广义上分为三个阶段：挂载、渲染、卸载
+
+因此可以把React的生命周期分为两类：挂载卸载过程和更新过程。
+
+[1. 挂载卸载过程](#1-挂载卸载过程)
+
+- [1.1.constructor()](#11constructor)
+- [1.2.componentWillMount()](#12componentwillmount)
+- [1.3.componentDidMount()](#13componentdidmount)
+- [1.4.componentWillUnmount ()](#14componentwillunmount)
+
+[2. 更新过程](#2-更新过程)
+
+- [2.1. componentWillReceiveProps (nextProps)](#21-componentwillreceiveprops-nextprops)
+- [2.2.shouldComponentUpdate(nextProps,nextState)](#22shouldcomponentupdatenextpropsnextstate)
+- [2.3.componentWillUpdate (nextProps,nextState)](#23componentwillupdate-nextpropsnextstate)
+- [2.4.componentDidUpdate(prevProps,prevState)](#24componentdidupdateprevpropsprevstate)
+- [2.5.render()](#25render)
+
+
+
+![img](https://upload-images.jianshu.io/upload_images/16775500-8d325f8093591c76.jpg?imageMogr2/auto-orient/strip|imageView2/2/w/740/format/webp)
+
+
+
+##### 1. 挂载卸载过程
+
+1.1.constructor()
+
+constructor()中完成了React数据的初始化，它接受两个参数：props和context，当想在函数内部使用这两个参数时，需使用super()传入这两个参数。
+ 注意：只要使用了constructor()就必须写super(),否则会导致this指向错误。
+
+
+
+1.2.componentWillMount()
+
+componentWillMount()一般用的比较少，它更多的是在服务端渲染时使用。它代表的过程是组件已经经历了constructor()初始化数据后，但是还未渲染DOM时。
+
+
+
+1.3.componentDidMount()
+
+组件第一次渲染完成，此时dom节点已经生成，可以在这里调用ajax请求，返回数据setState后组件会重新渲染
+
+
+
+1.4.componentWillUnmount ()
+
+在此处完成组件的卸载和数据的销毁。
+
+1. clear你在组建中所有的setTimeout,setInterval
+2. 移除所有组建中的监听 removeEventListener
+3. 有时候我们会碰到这个warning:
+
+```csharp
+Can only update a mounted or mounting component. This usually means you called setState() on an unmounted component. This is a no-op. Please check the code for the undefined component.
+```
+
+原因：因为你在组件中的ajax请求返回setState,而你组件销毁的时候，请求还未完成，因此会报warning
+ 解决方法：
+
+
+
+```kotlin
+componentDidMount() {
+    this.isMount === true
+    axios.post().then((res) => {
+    this.isMount && this.setState({   // 增加条件ismount为true时
+      aaa:res
+    })
+})
+}
+componentWillUnmount() {
+    this.isMount === false
+}
+```
+
+
+
+
+
+##### 2. 更新过程
+
+2.1. componentWillReceiveProps (nextProps)
+
+1. 在接受父组件改变后的props需要重新渲染组件时用到的比较多
+2. 接受一个参数nextProps
+3. 通过对比nextProps和this.props，将nextProps的state为当前组件的state，从而重新渲染组件
+
+
+
+```kotlin
+  componentWillReceiveProps (nextProps) {
+    nextProps.openNotice !== this.props.openNotice&&this.setState({
+        openNotice:nextProps.openNotice
+    }，() => {
+      console.log(this.state.openNotice:nextProps)
+      //将state更新为nextProps,在setState的第二个参数（回调）可以打         印出新的state
+  })
+}
+```
+
+
+
+2.2.shouldComponentUpdate(nextProps,nextState)
+
+1. 主要用于性能优化(部分更新)
+2. 唯一用于控制组件重新渲染的生命周期，由于在react中，setState以后，state发生变化，组件会进入重新渲染的流程，在这里return false可以阻止组件的更新
+3. 因为react父组件的重新渲染会导致其所有子组件的重新渲染，这个时候其实我们是不需要所有子组件都跟着重新渲染的，因此需要在子组件的该生命周期中做判断
+
+
+
+2.3.componentWillUpdate (nextProps,nextState)
+
+shouldComponentUpdate返回true以后，组件进入重新渲染的流程，进入componentWillUpdate,这里同样可以拿到nextProps和nextState。
+
+
+
+2.4.componentDidUpdate(prevProps,prevState)
+
+组件更新完毕后，react只会在第一次初始化成功会进入componentDidmount,之后每次重新渲染后都会进入这个生命周期，这里可以拿到prevProps和prevState，即更新前的props和state。
+
+
+
+2.5.render()
+
+render函数会插入jsx生成的dom结构，react会生成一份虚拟dom树，在每一次组件更新时，在此react会通过其diff算法比较更新前后的新旧DOM树，比较以后，找到最小的有差异的DOM节点，并重新渲染。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### 组件状态
 
 ##### `setState` 实际做了什么？
@@ -2511,6 +2681,184 @@ handleSomething() {
 
 - 这样会破坏掉 `props` 和 `state` 之间的一致性，造成一些难以 debug 的问题。
 - 这样会让一些我们正在实现的新功能变得无法实现
+
+
+
+
+
+
+
+#### Context
+
+
+
+类似于 Vue中的 provide/inject，在很深的嵌套组件之间传值！
+
+
+
+##### When Use？
+
+Context 设计目的是为了共享那些对于一个组件树而言是“全局”的数据，例如当前认证的用户、主题或首选语言。
+
+Context 主要应用场景在于*很多*不同层级的组件需要访问同样一些的数据。请谨慎使用，因为这会使得组件的复用性变差。
+
+**如果你只是想避免层层传递一些属性，[组件组合（component composition）](https://react.docschina.org/docs/composition-vs-inheritance.html)有时候是一个比 context 更好的解决方案。**
+
+但是，有的时候在组件树中很多不同层级的组件需要访问同样的一批数据。Context 能让你将这些数据向组件树下所有的组件进行“广播”，所有的组件都能访问到这些数据，也能访问到后续的数据更新。使用 context 的通用的场景包括管理当前的 locale，theme，或者一些缓存数据，这比替代方案要简单的多。
+
+
+
+
+
+##### API使用：
+
+[Context – React (docschina.org)](https://react.docschina.org/docs/context.html)
+
+###### `React.createContext`
+
+```
+const MyContext = React.createContext(defaultValue);
+```
+
+创建一个 Context 对象。当 React 渲染一个订阅了这个 Context 对象的组件，这个组件会从组件树中离自身最近的那个匹配的 `Provider` 中读取到当前的 context 值。
+
+**只有**当组件所处的树中没有匹配到 Provider 时，其 `defaultValue` 参数才会生效。此默认值有助于在不使用 Provider 包装组件的情况下对组件进行测试。注意：将 `undefined` 传递给 Provider 的 value 时，消费组件的 `defaultValue` 不会生效。
+
+
+
+
+
+##### 示例：
+
+
+
+在嵌套组件中更新Context
+
+从一个在组件树中嵌套很深的组件中更新 context 是很有必要的。在这种场景下，你可以通过 context 传递一个函数，使得 consumers 组件更新 context：
+
+
+
+theme-context.js
+
+```js
+import React from "react";
+
+export const themes = {
+  light: {
+    foreground: '#000000',
+    background: '#eeeeee',
+  },
+  dark: {
+    foreground: '#ffffff',
+    background: '#222222',
+  },
+};
+
+// 确保传递给 createContext 的默认值数据结构是调用的组件（consumers）所能匹配的！
+export const ThemeContext = React.createContext({
+  theme: themes.dark,
+  toggleTheme: () => {},
+});
+```
+
+
+
+★此处主要是创建 context
+
+
+
+theme-toggler-button.jsx
+
+```jsx
+import {ThemeContext} from './theme-context';
+
+function ThemeTogglerButton() {
+  // Theme Toggler 按钮不仅仅只获取 theme 值，
+  // 它也从 context 中获取到一个 toggleTheme 函数
+  return (
+    <ThemeContext.Consumer>
+      {({theme, toggleTheme}) => (
+        <button
+          onClick={toggleTheme}
+          style={{backgroundColor: theme.background}}>
+          Toggle Theme
+        </button>
+      )}
+    </ThemeContext.Consumer>
+  );
+}
+
+export default ThemeTogglerButton;
+```
+
+
+
+index.jsx
+
+```jsx
+import {ThemeContext, themes} from './theme-context.js';
+import ThemeTogglerButton from './theme-toggler-button.jsx';
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.toggleTheme = () => {
+      this.setState(state => ({
+        theme:
+          state.theme === themes.dark
+            ? themes.light
+            : themes.dark,
+      }));
+    };
+
+    // State 也包含了更新函数，因此它会被传递进 context provider。
+    this.state = {
+      theme: themes.light,
+      toggleTheme: this.toggleTheme,
+    };
+  }
+
+  render() {
+    // 整个 state 都被传递进 provider
+    return (
+      <ThemeContext.Provider value={this.state}>
+        <Content />
+      </ThemeContext.Provider>
+    );
+  }
+}
+
+function Content() {
+  return (
+    <div>
+      <ThemeTogglerButton />
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+★ 这里通过state来提供了value从而通过 ==context.Provider==传递给了嵌套的 ==context.Consumer==
+
+
+
+##### Summary：
+
+总的来说context也可以通过props实现，但是context主要用于大量信息相同的情况！
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2655,13 +3003,78 @@ class CustomTextInput extends React.Component {  // ...
 
 
 
+#### 组件通信
 
 
 
 
 
+##### props
 
 
+
+普通的props通信应该很熟悉，这里举一个多层的！
+
+```jsx
+import React, {useState} from 'react'
+import ReactDOM from 'react-dom'
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      nickName: 'Riki',
+      age: 16,
+    }
+  }
+
+  render() {
+    return (
+      <div>
+        <Profile {...this.state}/>
+      </div>
+    )
+  }
+}
+
+function Profile(props) {
+  return (
+    <div>
+      <ProfileHeader {...props}/>
+    </div>
+  )
+}
+
+function ProfileHeader(props) {
+  return (
+    <div>
+      <h1>name: {props.nickName}</h1>
+      <h1>age: {props.age}</h1>
+    </div>
+  )
+}
+
+ReactDOM.render(
+  <App/>,
+  document.getElementById('root')
+)
+```
+
+
+
+💎这里主要是想说一下 对象扩展符 来传递参数，这里 `{...props}` 和 `{...this.state}` 都可以直接传递 props! 注意哦，这里的 大括号 {} 不是对象的意思，在react传递对象的话应该是双括号 {{}} ❗️ 这里只是jsx语法传递变量啦，相当于把原来的props拆分然后传递 !
+
+
+
+```jsx
+<Profile {...this.state}/>
+```
+
+相当于
+
+```jsx
+<Profile nickName={this.state.nickName} age={this.state.age}/>
+```
 
 
 

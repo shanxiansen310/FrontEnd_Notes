@@ -265,6 +265,182 @@ console.log(user.fullName);
 
 
 
+#### 声明文件 .d.ts
+
+当使用第三方库时，我们需要引用它的声明文件，才能获得对应的代码补全、接口提示等功能。
+
+d.ts大名叫TypeScript Declaration File，存放一些声明，类似于C/C++的.h头文件（#include `<stdio.h>`）：
+
+
+
+参考：[声明文件 · TypeScript 入门教程 (xcatliu.com)](https://ts.xcatliu.com/basics/declaration-files#什么是声明语句)
+
+由于本章涉及大量新语法，故在本章开头列出新语法的索引，方便大家在使用这些新语法时能快速查找到对应的讲解：
+
+- [`declare var`](https://ts.xcatliu.com/basics/declaration-files#declare-var) 声明全局变量
+- [`declare function`](https://ts.xcatliu.com/basics/declaration-files#declare-function) 声明全局方法
+- [`declare class`](https://ts.xcatliu.com/basics/declaration-files#declare-class) 声明全局类
+- [`declare enum`](https://ts.xcatliu.com/basics/declaration-files#declare-enum) 声明全局枚举类型
+- [`declare namespace`](https://ts.xcatliu.com/basics/declaration-files#declare-namespace) 声明（含有子属性的）全局对象
+- [`interface` 和 `type`](https://ts.xcatliu.com/basics/declaration-files#interface-和-type) 声明全局类型
+- [`export`](https://ts.xcatliu.com/basics/declaration-files#export) 导出变量
+- [`export namespace`](https://ts.xcatliu.com/basics/declaration-files#export-namespace) 导出（含有子属性的）对象
+- [`export default`](https://ts.xcatliu.com/basics/declaration-files#export-default) ES6 默认导出
+- [`export =`](https://ts.xcatliu.com/basics/declaration-files#export-1) commonjs 导出模块
+- [`export as namespace`](https://ts.xcatliu.com/basics/declaration-files#export-as-namespace) UMD 库声明全局变量
+- [`declare global`](https://ts.xcatliu.com/basics/declaration-files#declare-global) 扩展全局变量
+- [`declare module`](https://ts.xcatliu.com/basics/declaration-files#declare-module) 扩展模块
+- [`/// <reference /> `](https://ts.xcatliu.com/basics/declaration-files#san-xie-xian-zhi-ling) 三斜线指令
+
+
+
+
+
+💎全局变量就是声明了在全部的文件中就可以用了，不需要再 export/import
+
+
+
+这里讲一下 npm 导入：
+
+一般我们通过 `import foo from 'foo'` 导入一个 npm 包，这是符合 ES6 模块规范的。
+
+在我们尝试给一个 npm 包创建声明文件之前，需要先看看它的声明文件是否已经存在。一般来说，npm 包的声明文件可能存在于两个地方：
+
+1. 与该 npm 包绑定在一起。判断依据是 `package.json` 中有 `types` 字段，或者有一个 `index.d.ts` 声明文件。这种模式不需要额外安装其他包，是最为推荐的，所以以后我们自己创建 npm 包的时候，最好也将声明文件与 npm 包绑定在一起。
+2. 发布到 `@types` 里。我们只需要尝试安装一下对应的 `@types` 包就知道是否存在该声明文件，安装命令是 `npm install @types/foo --save-dev`。这种模式一般是由于 npm 包的维护者没有提供声明文件，所以只能由其他人将声明文件发布到 `@types` 里了。
+
+假如以上两种方式都没有找到对应的声明文件，那么我们就需要自己为它写声明文件了。由于是通过 `import` 语句导入的模块，所以声明文件存放的位置也有所约束，一般有两种方案：
+
+1. 创建一个 `node_modules/@types/foo/index.d.ts` 文件，存放 `foo` 模块的声明文件。这种方式不需要额外的配置，但是 `node_modules` 目录不稳定，代码也没有被保存到仓库中，无法回溯版本，有不小心被删除的风险，故不太建议用这种方案，一般只用作临时测试。
+2. 创建一个 `types` 目录，专门用来管理自己写的声明文件，将 `foo` 的声明文件放到 `types/foo/index.d.ts` 中。这种方式需要配置下 `tsconfig.json` 中的 `paths` 和 `baseUrl` 字段。
+
+
+
+❗️不过在DOU+项目中一般都是直接在对应文件夹下直接建立同名的 `d.ts` 文件
+
+目录结构：
+
+```autoit
+/path/to/project
+├── src
+|  └── index.ts
+├── types
+|  └── foo
+|     └── index.d.ts
+└── tsconfig.json
+```
+
+`tsconfig.json` 内容：
+
+```json
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "baseUrl": "./",
+        "paths": {
+            "*": ["types/*"]
+        }
+    }
+}
+```
+
+如此配置之后，通过 `import` 导入 `foo` 的时候，也会去 `types` 目录下寻找对应的模块的声明文件了。
+
+
+
+##### 如何编写一个 d.ts 文件？
+
+参考：[如何编写一个d.ts文件 - SegmentFault 思否](https://segmentfault.com/a/1190000009247663)
+
+总结一下：
+从类型`type`角度分为：基本类型（string、number、boolean等）及其混合；复杂类型（class、function、object）及其混合（比如说又是class又是function）。
+从代码有效范围分为：全局变量、模块变量和又是全局变量又是模块变量的。
+从定义文件来说：自己写的`.d.ts`文件和扩展别人写的`.d.ts`文件。
+以上三个角度，应该覆盖了描述文件的各个方面了。
+
+
+
+简要选取几个：
+
+###### 模块化的全局变量
+
+这个是怎么回事呢，就是有时候我们定义全局变量的时候需要引入(别人写的)文件，比如这样的，我想声明个全局变量req：
+
+ <img src="https://segmentfault.com/img/bVbxEAj?w=526&h=124" alt="clipboard.png" style="zoom:87%;" />
+
+由于我们当前的d.ts文件使用了import/export语法，那么ts编译器就不把我们通过`declare var xxx:yyy`当成了全局变量了，那么我们就需要通过以下的方式声明全局变量：
+
+```tsx
+import { Request,Response} from 'express'
+
+declare global {
+  const req: Request
+  const res: Response
+
+  namespace OOO {
+    const a:number
+  }
+}
+```
+
+
+
+
+
+###### d.ts文件位置
+
+如果是模块化的话那就放到和源码（A.js）文件同一个目录下，如果是全局变量的话理论上放到哪里都可以————当然除非你在tsconfig.json 文件里面特殊配置过。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### 基础类型
 
 | 数据类型   | 关键字    | 描述                                                         |
