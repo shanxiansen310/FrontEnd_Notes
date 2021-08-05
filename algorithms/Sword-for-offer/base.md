@@ -1611,6 +1611,8 @@ const hammingWeight = function(n) {
 
 
 
+
+
 ★解法②: 利用 n&n-1
 
 ![image-20201228115855144](base.assets\image-20201228115855144.png)
@@ -1671,7 +1673,7 @@ var hammingWeight = function(n) {
 **说明:**
 
 - -100.0 < *x* < 100.0
-- *n* 是 32 位有符号整数，其数值范围是 [−231, 231 − 1] 。
+- *n* 是 32 位有符号整数，其数值范围是 [−2^31^,  2^31−1^] 。
 
 
 
@@ -1740,6 +1742,28 @@ const myPow = function(x, n){
 
 
 
+③刷:
+
+怎么说呢? 还是要注意考虑 <span style="font-weight:bold; color:red;">n可能为负数</span>
+
+```js
+const myPow = (x, n) => {
+	// 注意考虑n可能为负数
+	const absPow = n => {
+		if (n === 0) return 1;
+		if (n === 1) return x;
+		const res = absPow(n >>> 1);
+		return n % 2 ? res * res * x : res * res;
+	}
+	const result = absPow(Math.abs(n));
+	return n > 0 ? result : 1 / result;
+}
+```
+
+❗上面二刷有点问题,不要使用Math.pow函数
+
+
+
 
 
 
@@ -1752,14 +1776,14 @@ const myPow = function(x, n){
 
 示例 1:
 
-输入: n = 1
-输出: [1,2,3,4,5,6,7,8,9]
+输入: $n = 1$
+输出: $[1,2,3,4,5,6,7,8,9]$
 
 
 说明：
 
-用返回一个整数列表来代替打印
-n 为正整数
+* 用返回一个整数列表来代替打印
+* n 为正整数
 
 
 
@@ -1831,9 +1855,9 @@ const printNumbers = function(n){
 
 
 
+❗ join是 '' 不是 ' '
 
-
-
+❗ shift是从头部移除,unshift是从头部添加!
 
 
 
@@ -1873,7 +1897,7 @@ p = ".* "
 
 - `s` 可能为空，且只包含从 `a-z` 的小写字母。
 - `p` 可能为空，且只包含从 `a-z` 的小写字母以及字符 `.` 和 `*`，无连续的 `'*'`。
-- `.`这个表示空!!!
+- `.` 这个可以表示空格! <span style="font-weight:bold; color:red;">但不能为空!</span>
 
 
 
@@ -1884,6 +1908,38 @@ p = ".* "
 ![image-20210304180330445](base.assets/image-20210304180330445.png)
 
 ![image-20210304180428101](base.assets/image-20210304180428101.png)
+
+
+
+🌟**解释一下**
+
+ <span style=" color:red;">dp\[i\]\[j\] 对应的是 s[i-1] , p[j-1]</span>
+
+1. 1 比如说  s: abc  p: ab* , 我们知道 $dp[1][1]$ 是true的! 由于当 $j=3$ 时 $p[j-1]= *$ ,因此 $dp[1][3]$也为true，也就是说s的前1个字符与p的前3个字符匹配！ 这什么意思呢？  就是认为 b* 表示b出现0次，因此s与p匹配    <span style="color:blue;">a 匹配 ab*</span>
+
+1. 2 还是以  s: abc  p: ab* 举例 (i=2,j=3)， 我们知道 $dp[2][2]$ 为 true, 而 $p[2]=*$ , 我们假设 * 前面的$p[1]$ 只出现了一次! 而这时 $s[i-1]=p[j-2]$ , 因此 $dp[i][j]$ 为true! 就是相当于让*前面的字符$p[i-2]$去匹配当前s的字符 $s[i-1]$    <span style="color:blue;">ab 匹配 ab\*</span>
+
+❓疑惑点: 为什么要保证 $dp[i-1][j]$ 为true呢?  我们比较的明明是 $s[i-1]和p[j-2]$ , 需要保证的应该是 这两个数之前的 $dp[i-1][j-2]$ 为true啊😅😅😅
+
+其实这里 $dp[i-1][j]$ 为true那么 $dp[i-1][j-2]$ 也为true! 这是由第一点得来的!    ❌
+
+上面这种说法是错误的!  $dp[i-1][j]$为true不能保证$dp[i-1][j-2]$为true, 第一点是在对应的b\*全都去掉的情况下得出的, 但这里我们并不能确保 s 是不需要 b字符的!  在$p[j-1]=*$的情况下只能通过 $dp[i-1][j-2]$ 为true来推出 $dp[i-1][j]$ 为true, 而不能反推,下面是两个反例!  
+
+aa 和 a*
+
+abb  ab*
+
+
+
+1. 3 由于 .表示任意字符, 因此还有一种情况是 $.*$ , 这样即使前面一个字符不相等也可以为true, 即保证$dp[i-1][j]$ 为true即可!    <span style="color:blue;">ab 匹配 a.*</span>
+
+
+
+这里也是 ! 其实保证的实际上是 $dp[i-1][j-2]$ ❗ 
+
+
+
+
 
 
 
