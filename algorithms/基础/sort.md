@@ -58,15 +58,15 @@ const BubbleSort=(arr)=>{
     /*注意这里只需要n-1趟就行了!!!*/
     for (let i=0;i<arr.length-1;i++){
         /*优化一下,如果没有再进行交换就结束*/
-        isSorted=true;
+        isSorted=false;
         /*每完成一趟都会选出一个极大值放在最后,所以可以少检查i个数*/
         for (let j=0;j<arr.length-1-i;j++){
             if (arr[j]>arr[j+1]){
                 [arr[j],arr[j+1]]=[arr[j+1],arr[j]];
-                isSorted=false;
+                isSorted=true;
             }
         }
-        if (isSorted){  //表示没有再进行交换
+        if (!isSorted){  //表示没有再进行交换
             break;
         }
     }
@@ -80,7 +80,7 @@ const BubbleSort=(arr)=>{
 
 ### 快速排序
 
- <img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\algorithms\基础\sort.assets\v2-fae604840f5d10a62758db7a4d830785_1440w.jpg" alt="img" style="zoom: 120%;" />
+ <img src="\sort.assets\v2-fae604840f5d10a62758db7a4d830785_1440w.jpg" alt="img" style="zoom: 120%;" />
 
 ![quickSort](sort.assets\quickSort.gif)
 

@@ -1897,7 +1897,7 @@ p = ".* "
 
 - `s` 可能为空，且只包含从 `a-z` 的小写字母。
 - `p` 可能为空，且只包含从 `a-z` 的小写字母以及字符 `.` 和 `*`，无连续的 `'*'`。
-- `.` 这个可以表示空格! <span style="font-weight:bold; color:red;">但不能为空!</span>
+- `.` 这个可以表示空格! <span style="font-weight:bold; color:red;">但不能为空!</span>     ‘’ ❌   ‘ ’ ✅
 
 
 
@@ -1928,6 +1928,23 @@ p = ".* "
 aa 和 a*
 
 abb  ab*
+
+⭐️其实这里就是考虑一个最接近的就行了！ 你以为考虑 $dp[i-1][j-2]$ 才是充要条件，其实这只是个充分条件！
+$$
+dp[i-1][j] \quad \&\quad p[j]=* \quad \Longleftrightarrow \quad dp[i][j]
+$$
+
+$$
+dp[i-1][j-2] \quad \&\quad p[j]=* \quad \Longrightarrow \quad dp[i][j]
+$$
+
+$$
+dp[i-1][j-2] \quad \&\quad p[j]=* \quad \nLeftarrow \quad dp[i][j]
+$$
+
+💎其实这里是动态规划，你不要去想前面的为什么成立，只用想当前的如何成立即可！
+
+
 
 
 
@@ -2027,9 +2044,54 @@ const match = (s,p,i,j)=> {
 
 
 
+▼二刷：
+
+不愧是hard :sweat_smile:
+
+```js
+/**
+ * @param {string} s
+ * @param {string} p
+ * @return {boolean}
+ */
+const isMatch = function (s, p) {
+  const sLen = s.length, pLen = p.length;
+  const dp = Array.from({length: sLen+1}, () => Array(pLen+1).fill(false));
+  for (let i = 2; i <= pLen; i += 2) {
+    if (p[i-1] === '*') dp[0][i] = true;
+    else break
+  }
+  dp[0][0]=true;
+  for (let i = 1; i <= sLen; i++) {
+    for (let j = 1; j <= pLen; j++) {
+      if (p[j - 1] === '*') {
+        dp[i][j] = (dp[i][j - 2]) || (dp[i - 1][j] && s[i - 1] === p[j - 2])
+          || (dp[i - 1][j] && p[j - 2] === '.');
+      } else {
+        dp[i][j] = (dp[i - 1][j - 1] && s[i - 1] === p[j - 1])
+          || (dp[i - 1][j - 1] && p[j - 1] === '.');
+      }
+    }
+  }
+  return  dp[sLen][pLen];
+}
+```
 
 
-#### [剑指 Offer 21. 调整数组顺序使奇数位于偶数前面](https://leetcode-cn.com/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
+
+💎很容易搞混的点是 ： <span style=" color:red;">dp\[i\]\[j\] 对应的是 s[i-1] , p[j-1]</span>
+
+💎需要预先对 $dp[0][j]$ 进行处理 ⚠️ 
+
+💎动态规划那几种情况的判断和推理！
+
+
+
+
+
+
+
+#### [★剑指 Offer 21. 调整数组顺序使奇数位于偶数前面](https://leetcode-cn.com/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
 
 难度简单
 
@@ -2083,6 +2145,8 @@ var exchange = function(nums) {
 
 这道题在牛客上要求保持原来的顺序, 我在这里想了很久...做个总结:
 
+
+
 **Summay:**
 
 ▼不要求顺序(书上和lc):
@@ -2094,6 +2158,24 @@ var exchange = function(nums) {
 1. 两个栈, 一个记录偶数, 一个记录奇数 **时间复杂度: O(n)** **空间复杂度: O(n)**
 2. 冒泡 
 3. 快慢双指针, 需要交换时就整体后移
+
+
+
+
+
+不要求顺序的话就是很简单的双指针思想
+
+```js
+const exchange = function (nums) {
+  let low = 0, high = nums.length - 1;
+  while (low < high) {
+    while (nums[low] % 2 === 1 && low < high) low++;
+    while (nums[high] % 2 === 0 && low < high) high--;
+    [nums[low], nums[high]] = [nums[high], nums[low]];
+  }
+  return nums;
+}
+```
 
 
 
@@ -2136,7 +2218,7 @@ var exchange = function(nums) {
  * @param {number} k
  * @return {ListNode}
  */
-var getKthFromEnd = function(head, k) {
+const getKthFromEnd = function(head, k) {
 
     //虽然leetcode没有要求,但是书中并非考的这么easy
 
@@ -2168,6 +2250,50 @@ var getKthFromEnd = function(head, k) {
 
 
 
+
+
+二刷：
+
+```js
+/**
+ * @param {ListNode} head
+ * @param {number} k
+ * @return {ListNode}
+ */
+const getKthFromEnd = function(head, k) {
+  if (head == null) return null;
+  if (k<=0) return null;
+  let prev = head, next=head;
+  while (--k) {  // 因为只需要移动k-1次，倒数第1不需要移动
+    if (next.next==null) return null; // 说明长度不够
+    next = next.next;
+  }
+  while (next.next){
+    prev=prev.next;
+    next=next.next;
+  }
+  return prev;
+}
+```
+
+
+
+💎主要考查的还是对范围的判断！ 如果再严谨一点可以加上 Number.isInteger 的考虑！
+
+思路很简单，就是快慢指针。next 先移动k-1步，可以自己举例子，倒数第一个指针不需要移动，倒数第二个指针需要移动一步。  
+
+😊温习下 while(k—) 是循环k次，while(--k)是循环k-1次
+
+
+
+
+
+
+
+
+
+
+
 #### 剑指offer23: 链表中环的入口节点
 
 leetcode和牛客上都没有收录这道题, 但我觉得还是要了解一下其思想!!!😊😊😊
@@ -2177,8 +2303,14 @@ leetcode和牛客上都没有收录这道题, 但我觉得还是要了解一下�
 步骤;
 
 1. 先判断是否有环?  快慢指针, 相遇则有(记录相遇节点meetNode), 若快指针到了null, 则无
-2. 根据相遇节点(meetNode肯定在环中)来得到环中节点的数目n
+2. 根据相遇节点(meetNode肯定在环中)来得到环中节点的数目n（因为一定在环中，因此从该节点开始计数，直到再次回到该节点！）
 3. 快慢指针, 快指针先走n步, 慢指针再开始走,相遇的地方就是入口节点
+
+
+
+
+
+
 
 
 
@@ -2289,6 +2421,38 @@ var reverseList = function(head) {
 
 
 
+剑指再刷：
+
+Way1:简单的prev、cur、next指针
+
+其实这里的next指针更像是一个临时指针：
+
+```js
+const reverseList = (head) => {
+  if (head==null||!head.next) return head;
+  let prev=head,cur = head.next,next = head.next;
+  while (next){
+    next=cur.next;
+    cur.next=prev;
+    prev=cur; cur=next;
+  }
+  head.next=null;
+  return prev;
+}
+```
+
+不过这里的思想和上面的 最简洁的模式一样，而且上面更简单
+
+
+
+
+
+
+
+
+
+
+
 
 
 #### [剑指 Offer 25. 合并两个排序的链表](https://leetcode-cn.com/problems/he-bing-liang-ge-pai-xu-de-lian-biao-lcof/)
@@ -2372,6 +2536,8 @@ var mergeTwoLists = function(l1, l2) {
 };
 ```
 
+
+
 way2： 递归
 
 代码更简洁，但增加了空间复杂度
@@ -2403,11 +2569,21 @@ var mergeTwoLists = function(l1, l2) {
 
 
 
+
+
+
+
+
+
+
+
+
+
 #### [★★剑指 Offer 26. 树的子结构](https://leetcode-cn.com/problems/shu-de-zi-jie-gou-lcof/)
 
 难度中等
 
-输入两棵二叉树A和B，判断B是不是A的子结构。(约定空树不是任意一个树的子结构)
+输入两棵二叉树A和B，判断B是不是A的子结构。( **约定空树不是任意一个树的子结构** )
 
 B是A的子结构， 即 A中有出现和B相同的结构和节点值。
 
@@ -2453,7 +2629,7 @@ B是A的子结构， 即 A中有出现和B相同的结构和节点值。
 0 <= 节点个数 <= 10000
 ```
 
- <img src="base.assets/image-20210308125323439.png" alt="image-20210308125323439" style="zoom:67%;" />
+ <img src="base.assets/image-20210308125323439.png" alt="image-20210308125323439" style="zoom:60%;" />
 
 ![image-20210308123451163](base.assets/image-20210308123451163.png)
 
@@ -2503,12 +2679,49 @@ var isSubStructure = function(A, B) {
 
 
 
+
+
+```js
+const isSubStructure = function(A, B) {
+  const isEqual = (m,n)=>{
+    if (n==null) return true;
+    if (m==null||m.val!==n.val) return false;
+    return isEqual(m.left,n.left)&&isEqual(m.right,n.right);
+  }
+
+  const recur = node => {
+    if (node==null){
+      return false
+    }
+    return isEqual(node,B)||recur(node.left)||recur(node.right)
+  }
+  if (B==null) return false;
+  return recur(A)
+}
+```
+
+⭐️主要考虑两个函数，一个是递归遍历（遍历所有的节点看能否有相同的节点，如果主🌲节点为null了那就应该返回true），另一个是判断是否相等，也是递归！
+
+⚠️需要注意的是  <span style='color:red;'>约定空树不是任意一个树的子结构</span>
+
+
+
+
+
+
+
 **🔴总结**
 
 * 编码前全面考虑所有可能的的输入
 * 考虑边界条件
 * 做好错误处理
 * 采取防御性编程, 做好错误处理
+
+
+
+
+
+
 
 
 
@@ -2558,7 +2771,7 @@ var isSubStructure = function(A, B) {
 
 
 
-![image-20210309084504384](base.assets/image-20210309084504384.png)
+ <img src="base.assets/image-20210309084504384.png" alt="image-20210309084504384" style="zoom:57%;" />
 
 ![image-20210309110430937](base.assets/image-20210309110430937.png)
 
@@ -2602,7 +2815,7 @@ var mirrorTree = function(root) {
 
 way2: 遍历, 利用队列(BFS)
 
- <img src="base.assets/image-20210309112502650.png" alt="image-20210309112502650" style="zoom: 67%;" />
+ <img src="base.assets/image-20210309112502650.png" alt="image-20210309112502650" style="zoom: 57%;" />
 
 ![image-20210309112559034](base.assets/image-20210309112559034.png)
 
@@ -2768,6 +2981,38 @@ var spiralOrder = function(matrix) {
 自己居然还是想出了思路😍😍😍
 
 关键就是left , right , top, bottom四个变量
+
+```js
+/**
+ * @param {number[][]} matrix
+ * @return {number[]}
+ */
+const spiralOrder = function(matrix){
+  const res=[];
+  if (matrix.length===0) return res;
+  let left=0,right=matrix[0].length-1,
+    top=0, bottom=matrix.length-1;
+  while (true){
+    for (let i = left; i <= right; i++) res.push(matrix[top][i])
+    if (++top>bottom) break;
+    for (let i = top; i <= bottom ; i++) res.push(matrix[i][right])
+    if (--right<left) break;
+    for (let i = right; i >= left; i--) res.push(matrix[bottom][i])
+    if (--bottom<top) break;
+    for (let i = bottom; i >= top ; i--) res.push(matrix[i][left])
+    if (++left>right) break;
+  }
+  return res;
+}
+```
+
+
+
+
+
+
+
+
 
 
 

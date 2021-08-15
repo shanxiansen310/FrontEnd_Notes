@@ -1927,7 +1927,7 @@ const validateEmail = () => {
 
 🚩 `v-model`就是vue中用来绑定input值并实现双向绑定的属性! `@blur`就是焦点不在改组件上时触发的事件
 
- ![image-20210702211627486](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210702211627486.png)![image-20210702211656822](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210702211656822.png)
+ ![image-20210702211627486](TS项目.assets\image-20210702211627486.png)![image-20210702211656822](TS项目.assets\image-20210702211656822.png)
 
 
 

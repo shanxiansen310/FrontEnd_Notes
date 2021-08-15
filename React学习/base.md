@@ -2728,6 +2728,86 @@ const MyContext = React.createContext(defaultValue);
 
 
 
+##### `Context.Consumer`
+
+```jsx
+<MyContext.Consumer>
+  {value => /* 基于 context 值进行渲染*/}
+</MyContext.Consumer>
+```
+
+
+
+这里，React 组件也可以订阅到 context 变更。这能让你在[函数式组件](https://react.docschina.org/docs/components-and-props.html#function-and-class-components)中完成订阅 context。
+
+这需要[函数作为子元素（function as a child）](https://react.docschina.org/docs/render-props.html#using-props-other-than-render)这种做法。这个函数接收当前的 context 值，返回一个 React 节点。传递给函数的 `value` 值等同于往上组件树离这个 context 最近的 Provider 提供的 `value` 值。如果没有对应的 Provider，`value` 参数等同于传递给 `createContext()` 的 `defaultValue`。
+
+
+
+
+
+##### `Class.contextType`
+
+```jsx
+class MyClass extends React.Component {
+  componentDidMount() {
+    let value = this.context;
+    /* 在组件挂载完成后，使用 MyContext 组件的值来执行一些有副作用的操作 */
+  }
+  componentDidUpdate() {
+    let value = this.context;
+    /* ... */
+  }
+  componentWillUnmount() {
+    let value = this.context;
+    /* ... */
+  }
+  render() {
+    let value = this.context;
+    /* 基于 MyContext 组件的值进行渲染 */
+  }
+}
+MyClass.contextType = MyContext;
+```
+
+
+
+挂载在 class 上的 `contextType` 属性会被重赋值为一个由 [`React.createContext()`](https://react.docschina.org/docs/context.html#reactcreatecontext) 创建的 Context 对象。<span style='color:red;font-weight:bold;'>这能让你使用 `this.context` 来消费最近 Context 上的那个值。</span>你可以在任何生命周期中访问到它，包括 render 函数中。
+
+```jsx
+class MyClass extends React.Component {
+  static contextType = MyContext;
+  render() {
+    let value = this.context;
+    /* 基于这个值进行渲染工作 */
+  }
+}
+```
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##### 示例：
 
 
@@ -3003,6 +3083,14 @@ class CustomTextInput extends React.Component {  // ...
 
 
 
+
+
+
+
+
+
+
+
 #### 组件通信
 
 
@@ -3080,11 +3168,413 @@ ReactDOM.render(
 
 
 
+### 深入原理
+
+
+
+[三天精通 React - 飞书云文档 (feishu.cn)](https://bytedance.feishu.cn/docs/doccnmgIb5KcV3F0zeE47o6PvCh#)
+
+
+
+#### key和ref
+
+
+
+React 组件中 props 有两个保留字段，key 和 ref。
+
+
+
+##### key
+
+key 是用来追踪 React Component 和实际渲染的 DOM 节点用的。默认使用组件所在位置进行标记。
+
+在渲染数组数据时，提供 key 可以提升 React 复用 DOM 节点的能力。
+
+[key - CodeSandbox](https://codesandbox.io/s/key-1st6g)
+
+上面的 Codesandbox 中，当一页有 3000 条数据时，使用 id 作为 key 的时候，翻页渲染性能数据如下：
+
+![img](file:///Users/bytedance/Desktop/FrontEnd_Notes/React%E5%AD%A6%E4%B9%A0/base.assets/(null)-20210810171004256.(null)?lastModify=1628586219)
+
+当使用 index 作为 key 时，翻页渲染性能如下：
+
+![img](file:///Users/bytedance/Desktop/FrontEnd_Notes/React%E5%AD%A6%E4%B9%A0/base.assets/(null)-20210810171004189.(null)?lastModify=1628586219)
+
+**可见 index 作为 key 比 id 快一倍**
+
+原因是当组件树某位置的 key 跟之前渲染的同位置节点有变更时，react 会认为源组件不可复用，会执行完整的 unmount 步骤，删除包括真实 DOM 节点在内的所有数据，完全重新初始化该节点。这个性能差距会随着节点复杂度成几何级别的增大。所以，**不要听信一些最佳实践所谓的要将 id 作为 key 渲染。弄清楚 react 运行的原理，才能做出恰当的选择。**
+
+
+
+##### 注意⚠️
+
+当使用index的时候，如果对数组进行修改（插入/删除），那么插入/删除的位置后面的所有节点key都会发生改变，导致不必要的更新。
+如果列表还应用了一些css过渡动画，可能会出现一些奇怪的bug。
+这是一个简单的例子，可以总结为：
+如果不会对数组元素进行中间插入/删除的操作，那么使用index通常是安全的，否则不建议使用index
 
 
 
 
 
+😅当然新手无脑id肯定是安全的
+
+
+
+##### ref
+
+
+
+ref 一般用来获取 DOM 节点。
+
+react 本质上将 ref 作为 Mutable 对象来看待，通过 ref 可以反向将子组件的内部方法和状态通过 Mutable 的 ref 传递给父组件。
+
+如果是自定义组件，在这里不推荐用 ref，因为写起来麻烦，且容易内存泄漏。
+
+
+
+子组件的内部状态会因为 ref 暴露给父组件。这样子组件在 unmount 的时候，因为父组件可能持有其内部状态导致无法 GC。
+
+做了个实验性的 demo：https://codesandbox.io/s/musing-mendeleev-hhqd3?file=/src/App.tsx
+
+原则上尽可能避免子组件给父组件添加自身内部方法和数据的行为。通过 props 暴露子组件行为才是正道。比如：要暴露 focus 方法的话，可以像 input[type="checkbox"] 的 checked 和 onChange 那样去实现：
+
+
+
+
+
+**😈ref的正确使用及副作用回收**
+
+ref 作为 React 中唯一的 Mutable 传递方式，形成了一套独特的使用范例。如果传给 ref 的是一个函数，这个函数的调用有以下规则：
+
+1. 如果 ref 函数跟上一次的 ref 函数不一致（引用比较），那么会在上一次渲染的 useLayoutEffect / useEffect 的回收函数调用后调用，且调用参数为 null，然后在本次渲染的 useLayoutEffect / useEffect 的回调函数之前，用 reference 实例调用一次 ref 函数。也就是说一共会调用两次！
+2. 如果 ref 函数跟上一次的 ref 函数一致，则重绘时不会调用 ref 函数。
+
+
+
+
+
+```
+ import React, { useState, useRef } from "react";
+ import "./styles.css";
+ 
+ export default function App() {
+   const { current: standaloneRefCallback } = useRef((f: any) => {
+     console.log(`standalone`, f);
+   });
+   const [, forceUpdate] = useState({});
+   const [visible, toggleVisibility] = useState(true);
+ 
+   return (
+     <div className="App">
+       {visible && (
+         <>
+           <h1
+             ref={(d) => {
+               console.log(`anonymous`, d);
+             }}
+           >
+             Hello
+           </h1>
+           <h1 ref={standaloneRefCallback}>World</h1>
+         </>
+       )}
+       <button type="button" onClick={() => forceUpdate({})}>
+         forceUpdate
+       </button>
+       <button type="button" onClick={() => toggleVisibility((s) => !s)}>
+         {visible ? "hide" : "show"}
+       </button>
+     </div>
+   );
+ }
+```
+
+
+
+<iframe title="ref-callback" src="https://codesandbox.io/embed/ref-callback-0z2nb?expanddevtools=1&amp;fontsize=14&amp;hidenavigation=1&amp;theme=dark" allow-top-navigation="false" allow-forms="false" allowfullscreen="true" allow-popups="false" sandbox="allow-same-origin allow-scripts" style="box-sizing: border-box; margin: 0px auto; max-width: 100%; width: 800px; border: 0px; height: 500px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; overflow: hidden;"></iframe>
+
+
+
+这个例子中，可以看到，在点击 forceUpdate 触发组件重绘的时候，anonymous 所在的 ref 会被调用两次，而 standalone 不会。当点击 hide / show 触发组件卸载和挂载的时候，两个 refCallback 都会被调用。
+
+
+
+💎因为 forceUpdate 传入的是一个新对象会导致组件强制重新渲染！ 但是这里 useRef 每次会返回相同的的对象因此重绘时不会调用ref函数！ 但是 anonymous 的ref每次返回的是一个新函数，**因此会更新还是更新两次**（第一次前面的卸载变为null，第二次新的挂载）！ 
+
+
+
+🔥最后的最后，为了最大限度保证在使用 ref 时不会有内存泄漏，我们应该避免使用 useRef 来获取 ref，因为这样就少了 ref 是 null 的处理步骤。使用函数（如下面的 refCallback），通过 TS 的类型时刻提醒自己 ref 是 null 的处理。
+
+```jsx
+ const refCallback = useCallback((reference: null | YourReferenceType) => {
+   if (reference === null) {
+     dispose();
+   } else {
+     reference.doSomething();
+   }
+ }, []);
+ 
+ <input ref={refCallback} />
+```
+
+
+
+
+
+
+
+
+
+![image-20210810195220809](base.assets/image-20210810195220809.png)
+
+
+
+
+
+
+
+![image-20210811125758745](base.assets/image-20210811125758745.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## API
+
+
+
+### React.memo
+
+```jsx
+const MyComponent = React.memo(function MyComponent(props) {
+  /* 使用 props 渲染 */
+});
+```
+
+`React.memo` 为[高阶组件](https://zh-hans.reactjs.org/docs/higher-order-components.html)。
+
+如果你的组件在相同 props 的情况下渲染相同的结果，那么你可以通过将其包装在 `React.memo` 中调用，以此通过记忆组件渲染结果的方式来提高组件的性能表现。<span style='color:red;font-weight:bold;'>这意味着在这种情况下，React 将跳过渲染组件的操作并直接复用最近一次渲染的结果。</span>
+
+`React.memo` 仅检查 props 变更。如果函数组件被 `React.memo` 包裹，且其实现中拥有 [`useState`](https://zh-hans.reactjs.org/docs/hooks-state.html)，[`useReducer`](https://zh-hans.reactjs.org/docs/hooks-reference.html#usereducer) 或 [`useContext`](https://zh-hans.reactjs.org/docs/hooks-reference.html#usecontext) 的 Hook，当 context 发生变化时，它仍会重新渲染。
+
+默认情况下其只会对复杂对象做浅层对比，如果你想要控制对比过程，那么请将自定义的比较函数通过第二个参数传入来实现。
+
+
+
+React 提供了一个 API：memo，它相当于 PureComponent，是一个高阶组件，默认对 props 做一次浅比较，如果 props 没有变化，则子组件不会重新执行
+
+
+
+⭐️`React.memo()`和`React.PureComponent`组件异同：
+
+异：React.memo()是`函数组件`，React.PureComponent是`类组件`。
+
+同：都是对接收的props参数进行**浅比较（Object.is）**，解决组件在运行时的效率问题，优化组件的重渲染行为。
+
+
+
+
+
+## Tips
+
+
+
+
+
+#### 1.组件性能优化
+
+
+
+React 组件是一个树形结构，且每个节点都是懒计算的（类似于 Thunk 的概念）。当一个节点不需要重新计算（重绘）时，他的子树都不会计算（重绘）。**所以我们做性能优化的目标，就是在尽量离根节点近的位置，拦截不必要的节点重算，从而减少重绘的计算量。**
+
+
+
+##### React.memo
+
+阻止节点重绘主要通过 React.memo 方法生成特殊的组件节点。它接受两个传参：
+
+```jsx
+React.memo(Component, areEqual);
+```
+
+
+
+1. Component组件
+
+
+
+2. areEqual
+
+   比较函数，比较函数的入参有两个，arg0 为 前一次渲染的 props, arg1 为本次渲染的 props。如果返回 true，则该节点本次渲染将被标记为无需重新计算，从而使其所有子节点、孙子节点都无需计算。
+
+areEqual 如果不传，默认使用 
+
+```
+(prevProps, nextProps) => shallowEqual(prevProps, nextProps)
+```
+
+做为比较函数。
+
+
+
+▼**对于一个组件，有三样东西会让她重绘**
+
+1. State 变更
+2. 依赖的 context 变更
+3. 父组件重绘
+
+💎所以用 React.memo 包裹之后，并不是说性能就会有多大的提高。如果组件中依赖的 context 中，有一部分并不是此组件需要的数据，但会经常变更，也会导致组件经常重绘。这时候我们可以增加一层组件，把依赖 context 中的数据，通过增加的一层父组件取出来，然后通过 props 传给真正渲染的组件，把 React.memo 加在真正渲染的组件上，来达到屏蔽 context 变更引起的重绘问题。
+
+
+
+```jsx
+import React, { useContext, useMemo } from "react";
+import "./styles.css";
+
+const initialState = { foo: 0, bar: 0 };
+
+const SomeContext = React.createContext(null);
+
+function PickContextData(props) {
+  const ctx = useContext(SomeContext);
+  const someDataFromContext = useMemo(() => {
+    console.log("useMemo");
+    const { foo } = ctx;
+    return {
+      data: foo
+    };
+  }, [ctx]);
+  return <RenderComponent data={someDataFromContext} {...props} />;
+}
+
+const RenderComponent = React.memo(({ data }) => {
+  console.log("render RenderComponent");
+  return <span>{data.data}</span>;
+});
+
+export default function App() {
+  const [fooBar, setFooBar] = React.useState(initialState);
+
+  return (
+    <div className="App">
+      <SomeContext.Provider value={fooBar}>
+        <PickContextData />
+      </SomeContext.Provider>
+      <button onClick={() => setFooBar({ ...fooBar, bar: fooBar.bar + 1 })}>
+        update fooBar
+      </button>
+    </div>
+  );
+}
+
+```
+
+⚠️在这种情况下还是会重新渲染  **RenderComponent**，因为只要context变化了就会出发重绘，即使只是依赖context中的一小部分
+
+
+
+如果我们想要不重新渲染的话应该对useMemo的 deps改为 $[ctx.foo]$，亲测有效！
+
+
+
+
+
+
+
+##### 通过 reducer 收敛业务逻辑
+
+在复杂组件中，随着 state 的增加，常常会导致以下问题：
+
+1. useCallback/useMemo/useEffect 的依赖图谱逐渐复杂
+2. useCallback/useMemo/useEffect 形成层叠关系的依赖，找不到源头，或者写了多余的依赖，难以梳理依赖关系
+
+
+
+```jsx
+const [state1, setState1] = useState();
+const [state2, setState2] = useState();
+const fn1 = useCallback(xxxx, [state1.something, state2.other]);
+const fn2 = useCallback(xxxx, [fn1]);
+const fn3 = useCallback(() => {fn1(state1); fn2(state2);}, [fn1, fn2, state1, state2]);
+
+useEffect(xxxx, [fn1, fn2, fn3]);
+```
+
+
+
+上面的代码在 CodeReview 过程中经常看到。
+
+一旦开始用 useCallback/useMemo，就发现为了引用不变，deps 开始病毒传播...
+
+随着 deps 的增多，代码维护成本、理解成本也直线上升。这种情况下，我们可以通过 reducer 函数来收敛逻辑，减少 deps
+
+
+
+1. 首先，我们编写 state 的赋值逻辑，这里，我们将所有页面用到的 useState 状态都放到一起
+
+```js
+// 定义 reducer
+const reducer = (state, action) => {
+  const { type, payload } = action;
+  switch(type) {
+    case 'fn1': {
+      // return nextState;
+    }
+    case 'fn2': {
+      // return nextState;
+    }
+    case 'fn3': {
+      // return nextState;
+    }
+  }
+}
+
+// 如果配合 immer，会更香
+import produce from 'immer';
+const reducer = produce((draft, action) => { });
+```
+
+
+
+2. 然后，我们创建类似 redux 的 dispatch 方法
+
+```jsx
+const [state, setState] = useState(() => ({ state1, state2 }));
+const { current: dispatch } = useRef((action) => {
+  setState((currentState) => {
+    return reducer(currentState, action);
+  });
+});
+```
+
+> 有同学这里可能会问，为什么不用 useReducer？因为 useReducer 返回的 dispatch 传参只能传一个，有时候就是希望有多个传参。
+
+> 如果要做一些骚操作，需要再封装一次 useReducer 的 dispatch。所以这里我一般用 useState 来承载 reducer 逻辑，方便在函数中插入特殊需求（比如做变更日志记录、undo、redo）
+
+如果代码中，有许多 deps 来自于不同的 useState，那就可以通过把 useState 合并在一起，通过 setState 传入函数，来获取当前最新 state 的状态，从而减少这部分的 deps。
 
 
 
