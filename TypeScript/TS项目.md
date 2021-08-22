@@ -785,7 +785,7 @@ div class="foo">
 
  
 
-| <img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210615215340603.png" alt="image-20210615215340603" style="zoom:50%;" /> | Problems:<br />1.Dialog被包裹在其他组件之中,易被干扰<br />2.样式也在其他组件中,容易混乱 |
+| <img src="TS项目.assets\image-20210615215340603.png" alt="image-20210615215340603" style="zoom:50%;" /> | Problems:<br />1.Dialog被包裹在其他组件之中,易被干扰<br />2.样式也在其他组件中,容易混乱 |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 
 
@@ -943,11 +943,11 @@ const onModalClose = () => {
 
 现在就简单的实现了一个窗口, 可以点击打开和关闭! 
 
-![image-20210615235350207](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210615235350207.png) ![image-20210615235402186](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210615235402186.png)
+![image-20210615235350207](TS项目.assets\image-20210615235350207.png) ![image-20210615235402186](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210615235402186.png)
 
 
 
-但是该对话组件虽然嵌套多层, 但实际上却通过teleport与app同级❗![image-20210623164807487](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210623164807487.png)
+但是该对话组件虽然嵌套多层, 但实际上却通过teleport与app同级❗![image-20210623164807487](TS项目.assets\image-20210623164807487.png)
 
 
 
@@ -1253,7 +1253,7 @@ npm install bootstrap@next --save
 
 设计图:  [vue3 (whimsical.com)](https://whimsical.com/vue3-Djb2TcWsLTPeapFdM3NaX)
 
-![image-20210623212329908](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210623212329908.png)
+![image-20210623212329908]( TS项目.assets\image-20210623212329908.png)
 
 
 
@@ -1314,7 +1314,7 @@ Vetur插件tips： 我们可以通过在该组件的settings.json中添加:
 
 然后该插件就会把vue文件转换为ts文件来分析语法, 最后再把结果转换为vue, 这样就能支持template的补全来支持TypeScript的类型
 
- <img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210624143341751.png" alt="image-20210624143341751" style="zoom:60%;" />
+ <img src=" TS项目.assets\image-20210624143341751.png" alt="image-20210624143341751" style="zoom:60%;" />
 
 (😅😅😅当然WebStorm本身就支持不用搞这么复杂!)
 
@@ -1435,7 +1435,7 @@ export default defineComponent({
 
 card组件:  卡片式的样式更加美观
 
- <img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210624160401670.png" alt="image-20210624160401670" style="zoom:67%;" />
+ <img src=" TS项目.assets\image-20210624160401670.png" alt="image-20210624160401670" style="zoom:67%;" />
 
 ```html
 <div class="card" style="width: 18rem;">
@@ -1452,7 +1452,7 @@ card组件:  卡片式的样式更加美观
 
 ##### ▼初步美化:
 
- ![image-20210624210943646](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210624210943646.png)
+ ![image-20210624210943646]( TS项目.assets\image-20210624210943646.png)
 
 ColumnList.vue
 
@@ -1538,7 +1538,7 @@ export default defineComponent({
 
 ### GlobalHeader组件
 
-![image-20210630144103600](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210630144103600.png)
+![image-20210630144103600]( TS项目.assets\image-20210630144103600.png)
 
 
 
@@ -1577,7 +1577,7 @@ export default defineComponent({
 
 1. 这里主要采用的Bootstrap中的navbar组件  [Navbar · Bootstrap v5.0 (getbootstrap.com)](https://getbootstrap.com/docs/5.0/components/navbar/)
 
-![image-20210630144418917](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210630144418917.png)
+![image-20210630144418917]( TS项目.assets\image-20210630144418917.png)
 
 ```html
 <nav class="navbar navbar-dark bg-dark">
@@ -1775,7 +1775,7 @@ return {
 
 ⑤dropdownRef.value是ref所在的那个标签!
 
- ![image-20210701202300765](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210701202300765.png)
+ ![image-20210701202300765]( TS项目.assets\image-20210701202300765.png)
 
 
 
@@ -2022,7 +2022,7 @@ export default defineComponent({
 
  <span style="color:blue;"> is-invalid 和 invalid-feedback </span> 是Bootstrap中的样式!  [Validation · Bootstrap v5.0 (getbootstrap.com)](https://getbootstrap.com/docs/5.0/forms/validation/#server-side)
 
- <img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210702231302943.png" alt="image-20210702231302943" style="zoom: 80%;" />
+ <img src=" TS项目.assets\image-20210702231302943.png" alt="image-20210702231302943" style="zoom: 80%;" />
 
 
 
@@ -2269,7 +2269,7 @@ export default defineComponent({
 
 我们发现并没有显示placeholder的值, 而且更离谱的是placeholder居然在父元素上面去了
 
- ![image-20210703190632710](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210703190632710.png)
+ ![image-20210703190632710]( TS项目.assets\image-20210703190632710.png)
 
 
 
@@ -2305,7 +2305,7 @@ export default defineComponent({
 
 这个\$attrs 对应于setup中的 context.attrs, 我们可以尝试log一下看看! 
 
- ![image-20210703194818787](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210703194818787.png)
+ ![image-20210703194818787]( TS项目.assets\image-20210703194818787.png)
 
 可以发现我们添加的 非Prop属性都可以找到!
 
@@ -2340,9 +2340,9 @@ export default defineComponent({
 
 #### 需求分析
 
-![image-20210704163701234](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210704163701234.png)
+![image-20210704163701234]( TS项目.assets\image-20210704163701234.png)
 
-![image-20210704163732045](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210704163732045.png)
+![image-20210704163732045]( TS项目.assets\image-20210704163732045.png)
 
 
 
@@ -2453,7 +2453,7 @@ return {
 
 log一下 inputRef.value: 
 
- ![image-20210704210824936](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210704210824936.png)
+ ![image-20210704210824936]( TS项目.assets\image-20210704210824936.png)
 
 果然可以发现该自定义组件上的属性和方法
 
@@ -2522,7 +2522,7 @@ const onSubmitForm = (res: boolean) => {
 
 💥新的思想：
 
-![image-20210704220412754](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210704220412754.png)
+![image-20210704220412754]( TS项目.assets\image-20210704220412754.png)
 
 
 
@@ -2616,7 +2616,7 @@ const emailValue = ref('shan@gmail.com')
 const passwordValue = ref('123')
 ```
 
-可以发现控制台打印出了对应的值![image-20210704230700899](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210704230700899.png)
+可以发现控制台打印出了对应的值![image-20210704230700899]( TS项目.assets\image-20210704230700899.png)
 
 说明我们在 父组件 ValidateForm中设置的callback被成功调用! 
 
@@ -2697,7 +2697,7 @@ type Events = {
 
 由于我们需要在提交前进行相关的验证, 于是我们需要重新设置提交事件, 以便在提交前进行检查!
 
-<img src="D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210705113758468.png" alt="image-20210705113758468" style="zoom: 67%;" />
+<img src="TS项目.assets\image-20210705113758468.png" alt="image-20210705113758468" style="zoom: 67%;" />
 
 改为:
 
@@ -2722,7 +2722,7 @@ const submitForm = () => {
 
 ❌ 我们这里采用的every, 但every存在短路现象, 比如
 
- ![image-20210705115516191](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210705115516191.png)
+ ![image-20210705115516191](\TS项目.assets\image-20210705115516191.png)
 
 我这里点击提交, 却只显示了 email 的错误, 实际上password也为空, 但没有检测到! 
 
@@ -2737,7 +2737,7 @@ const submitForm = () => {
 
 这样的话点击submit就会执行所有验证函数! 
 
- ![image-20210705120551816](D:\Study\FrontEnd\github_js_notes\FrontEnd_Notes\TypeScript\TS项目.assets\image-20210705120551816.png)
+ ![image-20210705120551816](\TS项目.assets\image-20210705120551816.png)
 
 
 

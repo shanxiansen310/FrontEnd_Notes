@@ -818,6 +818,8 @@ this.setState({
 });
 ```
 
+
+
 要解决这个问题，<span style='color:red;'>可以让 `setState()` 接收一个函数而不是一个对象</span> 。这个函数用上一个 state 作为第一个参数，将此次更新被应用时的 props 做为第二个参数：
 
 ```jsx
@@ -847,6 +849,8 @@ this.setState(function(state, props) {
 当你调用 `setState()` 的时候，React 会把你提供的对象合并到当前的 state。
 
 
+
+`setState()` 的第二个参数为可选的回调函数，它将在 `setState` 完成合并并重新渲染组件后执行。通常，我们建议使用 `componentDidUpdate()` 来代替此方式。
 
 
 

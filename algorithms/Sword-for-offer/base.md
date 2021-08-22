@@ -2773,7 +2773,7 @@ const isSubStructure = function(A, B) {
 
  <img src="base.assets/image-20210309084504384.png" alt="image-20210309084504384" style="zoom:57%;" />
 
-![image-20210309110430937](base.assets/image-20210309110430937.png)
+ <img src="base.assets/image-20210309110430937.png" alt="image-20210309110430937" style="zoom:57%;" />
 
 ```js
 /**
@@ -3228,6 +3228,60 @@ var validateStackSequences = function(pushed, popped) {
 
 
 
+
+
+② 
+
+```js
+const validateStackSequences = function(pushed, popped) {
+  if (pushed.length===0) return true;
+  const stack=[];
+  while (pushed.length){
+    stack.push(pushed.shift())
+
+    while (stack.length&&popped[0]===stack[stack.length-1]){
+      stack.pop();
+      popped.shift();
+    }
+  }
+  return stack.length===0;
+};
+```
+
+
+
+💎想到模拟栈很容易，但是要搞清楚如何模拟压入和弹出！
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### [★32 - I. 从上到下打印二叉树](https://leetcode-cn.com/problems/cong-shang-dao-xia-da-yin-er-cha-shu-lcof/)
 
 难度简单
@@ -3369,6 +3423,12 @@ var levelOrder = function(root) {
     return res;
 };
 ```
+
+
+
+
+
+
 
 
 
@@ -3537,6 +3597,27 @@ var verifyPostorder = function(postorder) {
 
 
 
+```js
+/**
+ * @param {number[]} postorder
+ * @return {boolean}
+ */
+const verifyPostorder = function(postorder){
+  const recur = (start,end) => {
+    if (start>=end) return true;
+    const root=postorder[end];
+    let p=start;
+    while (postorder[p]<root) p++;
+    const mid=p;
+    while (postorder[p]>root) p++;
+    return p===end&&recur(start,mid-1)&&recur(mid,end-1);
+  }
+  return  recur(0,postorder.length-1);
+}
+```
+
+
+
 
 
 
@@ -3668,6 +3749,37 @@ var pathSum = function(root, target) {
 
 
 
+二刷
+
+```js
+const pathSum = function (root, target) {
+  const res = [];
+  const arr = [];
+  let sum = 0;
+  const recur = node => {
+    if (node == null) return;
+    arr.push(node.val);
+    sum += node.val;
+    if (sum === target && !node.left && !node.right) res.push(arr.concat())
+    recur(node.left);
+    recur(node.right);
+    arr.pop();
+    sum -= node.val;
+    return;
+  }
+  recur(root);
+  return res;
+}
+```
+
+
+
+⚠️其实难度不大，就是普通的二叉树遍历！  不过要注意的是这个路径起点必须是根结点，终点必须是叶节点！
+
+
+
+
+
 #### ▼分解让复杂问题简单化
 
 
@@ -3781,6 +3893,10 @@ var copyRandomList = function(head) {
 
 
 
+* 我在想能不能重新开一个链表，但发现还是会影响到原来的链表！ 因此还是就在原链表上修改即可！
+
+
+
 
 
 #### [★★36. 二叉搜索树与双向链表](https://leetcode-cn.com/problems/er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-lcof/)
@@ -3867,6 +3983,46 @@ var treeToDoublyList = function(root) {
 
 
 
+剑指重刷：
+
+```js
+const treeToDoublyList = function (root) {
+  if (!root) return null
+  let pre = null, head = null; // pre标识上一个节点
+  const recur = node => {
+    if (node == null) return
+    recur(node.left)
+    if (!pre) {
+      // 找到最小的那个头节点
+      head = node;
+    } else {
+      // 已经找到头节点后pre就是node的左子节点or父节点
+      pre.right = node;
+    }
+    node.left = pre;
+    pre = node;
+    recur(node.right)
+  }
+  recur(root)
+  // 头尾相接
+  head.left = pre;
+  pre.right = head;
+  return head;
+}
+```
+
+
+
+⚠️重点还是pre的考虑！
+
+* 我们如何得到头节点？ 这是二叉搜索树，recur(node.left) 递归的的一个就是头节点！因此当pre为null的时候表示遇到了我们的head
+* 这里我一开始把pre当作node的左子节点or父节点，其实不是这样！  在中序遍历的二叉搜索树中 pre 就是单纯的上一个节点，也就是把节点从小到大排列顺序中的前一个节点！  因此在 recur(node)找出前一个节点pre后我们就进行节点的连接操作！
+* 这里其实pre是可以放在recur参数中的我们为啥没放呢？  因为我们最后还需要用到pre！  递归结束后pre指向最后一个节点，刚好可以和头节点head进行连接！
+
+
+
+
+
 ```js
 //way2:我自己想的,多了一个为n的空间存储指针...
 var treeToDoublyList = function(root) {
@@ -3906,6 +4062,10 @@ var treeToDoublyList = function(root) {
 
 };
 ```
+
+
+
+
 
 
 
@@ -4026,6 +4186,8 @@ var deserialize = function(data) {
  */
 ```
 
+
+
 **🌟更加优雅的DFS先序遍历方法**
 
 ```js
@@ -4037,7 +4199,7 @@ var deserialize = function(data) {
  */
 var serialize = function(root) {
     if(!root) return "x";
-    //必须要加一个符号!!!因为val转化为字符串后长度不定!!!
+    //必须要加一个符号!!! 因为val转化为字符串后长度不定!!!
     return root.val+","+serialize(root.left)+","+serialize(root.right);
 };
 
@@ -4176,6 +4338,47 @@ var permutation = function(s) {
 
 
 ★书中方法是进行交换, 这里是遍历判断, 实际上差不多
+
+
+
+jz重刷：
+
+```js
+const permutation = function (s) {
+  const res = new Set();
+  const arr = s.split(''), len=arr.length;
+  const str=[]
+
+  const recur = n =>{
+    if (n===len){
+      res.add(str.join(''))
+    }
+    for (let i = 0; i < len; i++) {
+      if (arr[i]==null) continue;
+      str[n]=arr[i];
+      arr[i]=null;
+      recur(n+1);
+      arr[i]=str[n];
+    }
+  }
+
+  recur(0);
+  return [...res];
+}
+```
+
+⚠️性能主要的差距在于是否使用set！  因此以后一些不需要重复的可以用set代替普通的数组！ 
+
+⭐️set转数组：
+
+1. […set]
+2. Array.from(set)
+
+
+
+
+
+
 
 
 
