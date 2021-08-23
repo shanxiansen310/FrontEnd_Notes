@@ -4425,9 +4425,9 @@ const permutation = function (s) {
 
 ![image-20210315102614173](base.assets/image-20210315102614173.png)
 
-<img src="base.assets/image-20210315102614173.png" alt="image-20210315102614173" style="zoom:67%;" />
 
-<img src="base.assets/image-20210315102614173.png" alt="image-20210315102614173" style="zoom:67%;" /><img src="base.assets/image-20210315102641669.png" alt="image-20210315102641669" style="zoom:67%;" />
+
+ <img src="base.assets/image-20210315102641669.png" alt="image-20210315102641669" style="zoom:57%;" />
 
 
 
@@ -4450,6 +4450,7 @@ var majorityElement = function(nums) {
     }
     return most;
 };
+
 
 //way2:快排
 var majorityElement = function(nums) {
@@ -4485,10 +4486,31 @@ var majorityElement = function(nums) {
     sort(0,nums.length-1);
    
     return nums[medium];
-
-
 };
 ```
+
+
+
+
+
+剑指重刷:
+
+```js
+const majorityElement = function(nums){
+	const res=[nums[0]];
+	for (let i = 1; i < nums.length; i++) {
+		if (res.length===0||res[0]===nums[i]) res.push(nums[i]);
+		else  res.pop();
+	}
+	return res[0]
+}
+```
+
+
+
+🌟就是摩尔投票的思想! 因为超过一半的数,, 所以肯定抵消完之后最后至少会剩一个数
+
+
 
 
 
@@ -5281,7 +5303,7 @@ var findNthDigit = function(n) {
 };
 ```
 
-(看了下书, 发现自己的本办法居然和书不谋而合!!!😍😍😍)
+(看了下书, 发现自己的笨办法居然和书不谋而合!!!😍😍😍)
 
 
 
