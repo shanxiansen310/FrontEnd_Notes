@@ -2773,7 +2773,7 @@ const isSubStructure = function(A, B) {
 
  <img src="base.assets/image-20210309084504384.png" alt="image-20210309084504384" style="zoom:57%;" />
 
- <img src="base.assets/image-20210309110430937.png" alt="image-20210309110430937" style="zoom:57%;" />
+![image-20210309110430937](base.assets/image-20210309110430937.png)
 
 ```js
 /**
@@ -3228,60 +3228,6 @@ var validateStackSequences = function(pushed, popped) {
 
 
 
-
-
-② 
-
-```js
-const validateStackSequences = function(pushed, popped) {
-  if (pushed.length===0) return true;
-  const stack=[];
-  while (pushed.length){
-    stack.push(pushed.shift())
-
-    while (stack.length&&popped[0]===stack[stack.length-1]){
-      stack.pop();
-      popped.shift();
-    }
-  }
-  return stack.length===0;
-};
-```
-
-
-
-💎想到模拟栈很容易，但是要搞清楚如何模拟压入和弹出！
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### [★32 - I. 从上到下打印二叉树](https://leetcode-cn.com/problems/cong-shang-dao-xia-da-yin-er-cha-shu-lcof/)
 
 难度简单
@@ -3423,12 +3369,6 @@ var levelOrder = function(root) {
     return res;
 };
 ```
-
-
-
-
-
-
 
 
 
@@ -3597,27 +3537,6 @@ var verifyPostorder = function(postorder) {
 
 
 
-```js
-/**
- * @param {number[]} postorder
- * @return {boolean}
- */
-const verifyPostorder = function(postorder){
-  const recur = (start,end) => {
-    if (start>=end) return true;
-    const root=postorder[end];
-    let p=start;
-    while (postorder[p]<root) p++;
-    const mid=p;
-    while (postorder[p]>root) p++;
-    return p===end&&recur(start,mid-1)&&recur(mid,end-1);
-  }
-  return  recur(0,postorder.length-1);
-}
-```
-
-
-
 
 
 
@@ -3749,37 +3668,6 @@ var pathSum = function(root, target) {
 
 
 
-二刷
-
-```js
-const pathSum = function (root, target) {
-  const res = [];
-  const arr = [];
-  let sum = 0;
-  const recur = node => {
-    if (node == null) return;
-    arr.push(node.val);
-    sum += node.val;
-    if (sum === target && !node.left && !node.right) res.push(arr.concat())
-    recur(node.left);
-    recur(node.right);
-    arr.pop();
-    sum -= node.val;
-    return;
-  }
-  recur(root);
-  return res;
-}
-```
-
-
-
-⚠️其实难度不大，就是普通的二叉树遍历！  不过要注意的是这个路径起点必须是根结点，终点必须是叶节点！
-
-
-
-
-
 #### ▼分解让复杂问题简单化
 
 
@@ -3893,10 +3781,6 @@ var copyRandomList = function(head) {
 
 
 
-* 我在想能不能重新开一个链表，但发现还是会影响到原来的链表！ 因此还是就在原链表上修改即可！
-
-
-
 
 
 #### [★★36. 二叉搜索树与双向链表](https://leetcode-cn.com/problems/er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-lcof/)
@@ -3983,46 +3867,6 @@ var treeToDoublyList = function(root) {
 
 
 
-剑指重刷：
-
-```js
-const treeToDoublyList = function (root) {
-  if (!root) return null
-  let pre = null, head = null; // pre标识上一个节点
-  const recur = node => {
-    if (node == null) return
-    recur(node.left)
-    if (!pre) {
-      // 找到最小的那个头节点
-      head = node;
-    } else {
-      // 已经找到头节点后pre就是node的左子节点or父节点
-      pre.right = node;
-    }
-    node.left = pre;
-    pre = node;
-    recur(node.right)
-  }
-  recur(root)
-  // 头尾相接
-  head.left = pre;
-  pre.right = head;
-  return head;
-}
-```
-
-
-
-⚠️重点还是pre的考虑！
-
-* 我们如何得到头节点？ 这是二叉搜索树，recur(node.left) 递归的的一个就是头节点！因此当pre为null的时候表示遇到了我们的head
-* 这里我一开始把pre当作node的左子节点or父节点，其实不是这样！  在中序遍历的二叉搜索树中 pre 就是单纯的上一个节点，也就是把节点从小到大排列顺序中的前一个节点！  因此在 recur(node)找出前一个节点pre后我们就进行节点的连接操作！
-* 这里其实pre是可以放在recur参数中的我们为啥没放呢？  因为我们最后还需要用到pre！  递归结束后pre指向最后一个节点，刚好可以和头节点head进行连接！
-
-
-
-
-
 ```js
 //way2:我自己想的,多了一个为n的空间存储指针...
 var treeToDoublyList = function(root) {
@@ -4062,10 +3906,6 @@ var treeToDoublyList = function(root) {
 
 };
 ```
-
-
-
-
 
 
 
@@ -4186,8 +4026,6 @@ var deserialize = function(data) {
  */
 ```
 
-
-
 **🌟更加优雅的DFS先序遍历方法**
 
 ```js
@@ -4199,7 +4037,7 @@ var deserialize = function(data) {
  */
 var serialize = function(root) {
     if(!root) return "x";
-    //必须要加一个符号!!! 因为val转化为字符串后长度不定!!!
+    //必须要加一个符号!!!因为val转化为字符串后长度不定!!!
     return root.val+","+serialize(root.left)+","+serialize(root.right);
 };
 
@@ -4338,47 +4176,6 @@ var permutation = function(s) {
 
 
 ★书中方法是进行交换, 这里是遍历判断, 实际上差不多
-
-
-
-jz重刷：
-
-```js
-const permutation = function (s) {
-  const res = new Set();
-  const arr = s.split(''), len=arr.length;
-  const str=[]
-
-  const recur = n =>{
-    if (n===len){
-      res.add(str.join(''))
-    }
-    for (let i = 0; i < len; i++) {
-      if (arr[i]==null) continue;
-      str[n]=arr[i];
-      arr[i]=null;
-      recur(n+1);
-      arr[i]=str[n];
-    }
-  }
-
-  recur(0);
-  return [...res];
-}
-```
-
-⚠️性能主要的差距在于是否使用set！  因此以后一些不需要重复的可以用set代替普通的数组！ 
-
-⭐️set转数组：
-
-1. […set]
-2. Array.from(set)
-
-
-
-
-
-
 
 
 
@@ -4599,6 +4396,67 @@ var getLeastNumbers = function(nums, k) {
 
 
 
+重刷：
+
+```js
+/**
+ * @param {number[]} arr
+ * @param {number} k
+ * @return {number[]}
+ */
+const getLeastNumbers = function(arr, k){
+  if (arr.length===0||k===0) return [];
+  const part = (low,high) => {
+    const key=arr[low];
+    while (low<high){
+      while (low<high&&key<=arr[high]) high--;
+      arr[low]=arr[high];
+      while (low<high&&key>=arr[low]) low++;
+      arr[high]=arr[low];
+    }
+    arr[low]=key;
+    return low;
+  }
+  let res=[];
+  const recur=(low,high)=>{
+    if (low<k){
+      const mid=part(low,high);
+      if (mid===k-1){
+        res = arr.slice(0,k)
+      }
+      else if (mid===k){
+        res = arr.slice(0,k)
+      }
+      else if (mid>k){
+        recur(low,mid-1)
+      }
+      else if (mid<k-1){
+        recur(mid+1,high)
+      }
+    }
+  }
+  recur(0,arr.length-1);
+  return res;
+}
+```
+
+
+
+🚨注意这里recur中的 if 条件！ 我们需要是 low < k, 而不是 low < high！在快排中一旦low=high就可以返回是因为快排只排序不用在递归得到结果，而这里需要在递归中获得结果，而当low=high时可能刚好获得结果！ 比如k=arr.length时最后 low可能会等于high，因此我们需要修改条件！
+
+1. low<k , 表示直到找到k都不会停止
+2. low<=high，满足一些最终相等的情况
+
+上面这两种都行！
+
+
+
+⚠️注意这里不要写成return！  这里是快排的思想，在快排中是对已有的数组进行排序，不会返回！ 因此在这里如果我们返回的话是返回不出去的（ 因为我们只在满足low<k条件下进行 
+
+
+
+
+
 way2: O(nlogk) 最大堆的方法    (实现堆太繁琐, 了解即好)
 
 🌟优点
@@ -4697,6 +4555,16 @@ var getLeastNumbers = function(arr, k) {
 
 
 
+先insert进去k个，然后再慢慢对比！  
+
+
+
+
+
+
+
+
+
 #### [★★★41. 数据流中的中位数](https://leetcode-cn.com/problems/shu-ju-liu-zhong-de-zhong-wei-shu-lcof/)
 
 难度困难
@@ -4751,32 +4619,32 @@ way1.最容易想到的, 用来理解下题意, 排好序后再找   O(nlogn)
  * initialize your data structure here.
  */
 var MedianFinder = function() {
-    this.data=[];
+  this.data=[];
 };
 
-/** 
+/**
  * @param {number} num
  * @return {void}
  */
 MedianFinder.prototype.addNum = function(num) {
-    this.data.push(num);
+  this.data.push(num);
 };
 
 /**
  * @return {number}
  */
 MedianFinder.prototype.findMedian = function() {
-    let len=this.data.length;
-    if(!len){
-        return null;
-    }
-    this.data.sort((a,b)=>a-b);
-    let mid=Math.floor((len-1)/2);
-    if(len%2===1){
-        return this.data[mid];
-    }else{
-        return (this.data[mid]+this.data[mid+1])/2;
-    }
+  let len=this.data.length;
+  if(!len){
+    return null;
+  }
+  this.data.sort((a,b)=>a-b);
+  let mid=Math.floor((len-1)/2);
+  if(len%2===1){
+    return this.data[mid];
+  }else{
+    return (this.data[mid]+this.data[mid+1])/2;
+  }
 };
 
 /**
@@ -4806,55 +4674,57 @@ MedianFinder.prototype.findMedian = function() {
  * initialize your data structure here.
  */
 var MedianFinder = function() {
-    this.data=[];
+  this.data=[];
 };
 
-/** 
+/**
  * @param {number} num
  * @return {void}
  */
 MedianFinder.prototype.addNum = function(num) {
-    //这里每次都是排好序的插入,所以直接二分查找就好!!!不建议使用快排
-    if(!this.data.length){
-        this.data.push(num);
-        return;   //别忘了返回!!!
-    }
+  //这里每次都是排好序的插入,所以直接二分查找就好!!!不建议使用快排
+  if(!this.data.length){
+    this.data.push(num);
+    return;   //别忘了返回!!!
+  }
 
-    let low=0,high=this.data.length-1;
-    //必须要加上 = ,不然最后无法清楚判断,
-    //比如 1,3,4插入2, 最后无法判断是插在1前还是1后
-    while(low<=high){    
-        let mid=Math.floor((low+high)/2);
-        if(this.data[mid]===num){
-            this.data.splice(mid,0,num); //在mid处插入num
-            return;
-        }else if(this.data[mid]>num){
-            high=mid-1;
-        }else{
-            low=mid+1;
-        }
+  let low=0,high=this.data.length-1;
+  //必须要加上 = ,不然最后无法清楚判断,
+  //比如 1,3,4插入2, 最后无法判断是插在1前还是1后
+  while(low<=high){
+    let mid=Math.floor((low+high)/2);
+    if(this.data[mid]===num){
+      this.data.splice(mid,0,num); //在mid处插入num
+      return;
+    }else if(this.data[mid]>num){
+      high=mid-1;
+    }else{
+      low=mid+1;
     }
-    //最后low=high时会对arr[mid]和num进行比较,num更小就插在arr[mid]
-    //num更大,则插在arr[mid+1],刚好可以用low来替代
-    this.data.splice(low,0,num);
+  }
+  //最后low=high时会对arr[mid]和num进行比较,num更小就插在arr[mid]
+  //num更大,则插在arr[mid+1],刚好可以用low来替代
+  this.data.splice(low,0,num);
 };
 
 /**
  * @return {number}
  */
 MedianFinder.prototype.findMedian = function() {
-    let len=this.data.length;
-    if(!len){
-        return null;
-    }
-    let mid=Math.floor((len-1)/2);
-    if(len%2){
-        return this.data[mid];
-    }else{
-        return (this.data[mid]+this.data[mid+1])/2;
-    }
+  let len=this.data.length;
+  if(!len){
+    return null;
+  }
+  let mid=Math.floor((len-1)/2);
+  if(len%2){
+    return this.data[mid];
+  }else{
+    return (this.data[mid]+this.data[mid+1])/2;
+  }
 };
 ```
+
+
 
 
 
@@ -4879,79 +4749,79 @@ MedianFinder.prototype.findMedian = function() {
 const maxHeapCmp=(x,y)=>x>y;  //最大堆
 const swap=(arr,i,j)=>([arr[i], arr[j]] = [arr[j], arr[i]]);
 class Heap{
-    /*默认最大堆*/
-    constructor(cmp=maxHeapCmp) {
-        this.container=[];
-        this.cmp=cmp;
-    }
+  /*默认最大堆*/
+  constructor(cmp=maxHeapCmp) {
+    this.container=[];
+    this.cmp=cmp;
+  }
 
-    insert(data){
-        const  {container,cmp}=this;
-        container.push(data);
-        let index=container.length-1;
-        //建立大顶堆/小顶堆
-        while (index) {
-            let parent = Math.floor((index - 1) / 2);
-            if (!cmp(container[index],container[parent])){
-                return;
-            }
-            swap(container,index,parent);
-            index=parent;
-        }
+  insert(data){
+    const  {container,cmp}=this;
+    container.push(data);
+    let index=container.length-1;
+    //建立大顶堆/小顶堆
+    while (index) {
+      let parent = Math.floor((index - 1) / 2);
+      if (!cmp(container[index],container[parent])){
+        return;
+      }
+      swap(container,index,parent);
+      index=parent;
     }
+  }
 
-    extract(){
-        const  {container,cmp}=this;
-        if (!container.length) return null;
-        swap(container,0,container.length-1);
-        const res=container.pop();  //得到结果
+  extract(){
+    const  {container,cmp}=this;
+    if (!container.length) return null;
+    swap(container,0,container.length-1);
+    const res=container.pop();  //得到结果
 
-        //调整堆
-        const length=container.length;
-        let index=0,exchange=index*2+1;
-        while (exchange<length){
-            //由比较函数确定大小顶堆. 如果这里是大顶堆,则需要大的,
-            // 所以我们判断的是右节点是否大于左节点
-            if (exchange+1<length && cmp(container[exchange+1],container[exchange])){
-                exchange++;
-            }
-            if (cmp(container[exchange],container[index])){
-                swap(container,exchange,index);
-                index=exchange;
-                exchange=exchange*2+1;
-            }else {   //这是建立在原本下面的都是大顶堆的情况,所以可以break
-                break;
-            }
-        }
-        return res;
+    //调整堆
+    const length=container.length;
+    let index=0,exchange=index*2+1;
+    while (exchange<length){
+      //由比较函数确定大小顶堆. 如果这里是大顶堆,则需要大的,
+      // 所以我们判断的是右节点是否大于左节点
+      if (exchange+1<length && cmp(container[exchange+1],container[exchange])){
+        exchange++;
+      }
+      if (cmp(container[exchange],container[index])){
+        swap(container,exchange,index);
+        index=exchange;
+        exchange=exchange*2+1;
+      }else {   //这是建立在原本下面的都是大顶堆的情况,所以可以break
+        break;
+      }
     }
+    return res;
+  }
 
-    top(){
-        return  this.container.length? this.container[0]:null;
-    }
+  top(){
+    return  this.container.length? this.container[0]:null;
+  }
 }
 
 /**
  * initialize your data structure here.
  */
 var MedianFinder = function() {
-    this.maxHeap=new Heap();
-    this.minHeap=new Heap((x,y)=>x<y);
+  this.maxHeap=new Heap();
+  this.minHeap=new Heap((x,y)=>x<y);
 };
 
-/** 
+/**
  * @param {number} num
  * @return {void}
  */
 MedianFinder.prototype.addNum = function(num) {
-    //对于传进来的数我们一开始其实是不知道该放在哪里的
-    //★所以就先进入maxHeap再取最大元素放至minHeap
-    //此时我们再判断长度进行相关调整
-    this.maxHeap.insert(num);
-    this.minHeap.insert(this.maxHeap.extract());
-    if(this.maxHeap.container.length<this.minHeap.container.length){
-        this.maxHeap.insert(this.minHeap.extract());
-    }
+  //对于传进来的数我们一开始其实是不知道该放在哪里的
+  //★所以就先进入maxHeap再取最大元素放至minHeap
+  //此时我们再判断长度进行相关调整
+  this.maxHeap.insert(num);
+  this.minHeap.insert(this.maxHeap.extract());
+  if(this.maxHeap.container.length<this.minHeap.container.length){
+    this.maxHeap.insert(this.minHeap.extract());
+  }
 
 };
 
@@ -4959,8 +4829,8 @@ MedianFinder.prototype.addNum = function(num) {
  * @return {number}
  */
 MedianFinder.prototype.findMedian = function() {
-   return this.maxHeap.container.length>this.minHeap.container.length ?
-    this.maxHeap.top() : (this.maxHeap.top()+this.minHeap.top())/2; 
+  return this.maxHeap.container.length>this.minHeap.container.length ?
+    this.maxHeap.top() : (this.maxHeap.top()+this.minHeap.top())/2;
 };
 
 /**
@@ -5003,6 +4873,8 @@ MedianFinder.prototype.findMedian = function() {
 
 - `1 <= arr.length <= 10^5`
 - `-100 <= arr[i] <= 100`
+
+
 
 
 
@@ -5052,6 +4924,34 @@ var maxSubArray = function(nums) {
 
 
 
+二刷： 优化一下更简洁
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+const maxSubArray = function(nums){
+  let maxSum=nums[0], curSum=nums[0];
+  for (let i = 1; i < nums.length; i++) {
+    if (curSum<0) curSum=0;
+    curSum+=nums[i];
+    maxSum=Math.max(maxSum,curSum);
+  }
+  return maxSum;
+}
+```
+
+
+
+😈思想很简单，curSum小于0的都丢弃！
+
+
+
+
+
+
+
 way2：动态规划
 
 思路和上面一样!!!
@@ -5069,16 +4969,16 @@ way2：动态规划
  * @param {number[]} nums
  * @return {number}
  */
-var maxSubArray = function(nums) {
-    let maxSum=nums[0];
-    for(let i=1;i<nums.length;i++){
-        if(nums[i-1]>0){
-            nums[i]+=nums[i-1];
-        }
-        maxSum=Math.max(maxSum,nums[i]); 
+const maxSubArray = function(nums) {
+  let maxSum=nums[0];
+  for(let i=1;i<nums.length;i++){
+    if(nums[i-1]>0){
+      nums[i]+=nums[i-1];
     }
-    return maxSum;
-};
+    maxSum=Math.max(maxSum,nums[i]);
+  }
+  return maxSum;
+}
 ```
 
 
@@ -5180,15 +5080,15 @@ var countDigitOne = function(n) {
 
 way2:依次计算每一位出现1的次数
 
- <img src="base.assets/image-20210318145014572.png" alt="image-20210318145014572" style="zoom:67%;" />
+ <img src="base.assets/image-20210318145014572.png" alt="image-20210318145014572" style="zoom:57%;" />
 
 🌟重点分清这三种情况
 
- <img src="base.assets/image-20210318145106634.png" alt="image-20210318145106634" style="zoom:67%;" />
+  <img src="base.assets/image-20210318145106634.png" alt="image-20210318145106634" style="zoom:57%;" />
 
- <img src="base.assets/image-20210318145124533.png" alt="image-20210318145124533" style="zoom:67%;" />
+ <img src="base.assets/image-20210318145124533.png" alt="image-20210318145124533" style="zoom:57%;" />
 
- <img src="base.assets/image-20210318145143936.png" alt="image-20210318145143936" style="zoom:67%;" />
+ <img src="base.assets/image-20210318145143936.png" alt="image-20210318145143936" style="zoom:57%;" />
 
 
 
@@ -5201,30 +5101,40 @@ way2:依次计算每一位出现1的次数
  * @param {number} n
  * @return {number}
  */
-var countDigitOne = function(n) {
-    let cur=n%10,low=0,count=0,digit=1,
+const countDigitOne = function(n) {
+  let cur=n%10,low=0,count=0,digit=1,
     high=Math.floor(n/10);
-    //★计算每一位出现1的次数
-    //cur和high都为0肯定就结束了
-    while(cur!==0||high!==0){
-        if(cur===0){
-            //cur出现1的次数只由high决定
-            count+=high*digit;  
-        }else if(cur===1){
-            //cur出现1的次数由high和low共同决定
-            count+=high*digit+low+1;
-        }else {
-            //cur出现1的次数只由high决定
-            count+=high*digit+digit;
-        }
-        low+=cur*digit;
-        cur=high%10;
-        high=Math.floor(high/10);
-        digit*=10;   
+  //★计算每一位出现1的次数
+  //cur和high都为0肯定就结束了
+  while(cur!==0||high!==0){
+    if(cur===0){
+      //cur出现1的次数只由high决定
+      count+=high*digit;
+    }else if(cur===1){
+      //cur出现1的次数由high和low共同决定
+      count+=high*digit+low+1;
+    }else {
+      //cur出现1的次数只由high决定
+      count+=high*digit+digit;
     }
-    return count;
+    low+=cur*digit;
+    cur=high%10;
+    high=Math.floor(high/10);
+    digit*=10;
+  }
+  return count;
 };
 ```
+
+
+
+😈有点难，建议写在纸上易懂一点！ 掌握思路能讲出来就行！
+
+
+
+
+
+
 
 
 
@@ -5271,13 +5181,13 @@ var countDigitOne = function(n) {
 思路来源于上一道题, 找规律
 
 0~9 :                    10
-10~99 :                9x20
+10~99 :                9x20    $9 * i * 10^{i-1}$
 100~999 :            9x300
 1000~9999 :       9x4000           
 
 🌟找到n位于哪一个位数的区间, 再进行细分查找
 
-![image-20210319102927500](base.assets/image-20210319102927500.png)
+ <img src="base.assets/image-20210319102927500.png" alt="image-20210319102927500" style="zoom:57%;" />
 
 ```js
 /**
@@ -5286,8 +5196,7 @@ var countDigitOne = function(n) {
  */
 var findNthDigit = function(n) {
     //1.for循环找到n的对应的值的位数
-    //2.n-pre / 位数
-
+    //2.digit / 位数
     if(n<10) return n;
     let count=10,digit=1;
     while(count<n){
@@ -5304,6 +5213,61 @@ var findNthDigit = function(n) {
 ```
 
 (看了下书, 发现自己的笨办法居然和书不谋而合!!!😍😍😍)
+
+
+
+
+
+建议举个例子来理解：
+
+3402    表示的是从0开始第 3402 个数字
+
+count=2890   remain=512  digit=4  index=128  loc=0  
+
+
+
+这里由于一开始搞混了 第几个和count的区别，有点混乱！  n-count其实不是remain，remain应该是n-count+1！ 为什么结果正确呢？  因为 最后把num当成了数组，也是从0开始，因此loc不用再加一
+
+count表示的是一共有多少个数字， 第count-1个数字对应count（比如第10个数字其实count已经为11了❗️）
+
+index表示从1000开始的第多少个数字，
+
+
+
+上面这种写法有点难理解，改一下⬇️：
+
+```js
+/**
+ * @param {number} n
+ * @return {number}
+ */
+const findNthDigit = function (n) {
+  //1.for循环找到n的对应的值的位数
+  //2.digit / 位数
+  if (n < 10) return n;
+  let index = 9, digit = 1;
+  while (index < n) {
+    digit++;
+    index += (9 * digit * Math.pow(10, digit - 1));
+  }
+  index -= (9 * digit * Math.pow(10, digit - 1));
+  const remain = n - index,
+    k = Math.floor((remain - 1) / digit),
+    loc = (remain - 1) % digit,
+    num = String(Math.pow(10, digit - 1) + k);
+  return parseInt(num[loc]);
+};
+```
+
+remain表示的是真实的从起始位置到第n位的位数，至于后面为什么都要减一，因为我们是从0开始计算的！
+
+
+
+
+
+
+
+
 
 
 

@@ -63,13 +63,13 @@ TypeScript 可处理已有的 JavaScript 代码，并只对其中的 TypeScript 
 
 ★同时也建议将ts-node安装上!  [ts-node - npm (npmjs.com)](https://www.npmjs.com/package/ts-node)  安装它的原因是typescript自带的tsc命令并不能直接运行typescript代码。但值得注意的是 ts-node 并不等于 typescript 的 Node.js ，仅仅封装了 typescript 的编译过程，提供直接运行typescript代码的能力。
 
-1.全局安装ts-node
+##### 1.全局安装ts-node
 
 > npm i -g ts-node
 
 
 
-2.配置ts-node环境变量
+##### 2.配置ts-node环境变量
 
 ★要想配置环境变量，我们首先要清楚 npm 全局安装 ts-node 的位置
 
@@ -106,7 +106,7 @@ This package contains type definitions for Node.js, 就是让node直到TypeScrip
 
 ```typescript
 function greeter(person:   string) {
-    return "Hello, " + person;
+  return "Hello, " + person;
 }
 
 let user = "Jane User";
@@ -133,10 +133,23 @@ greeter.js
 
 ```js
 function greeter(person) {
-    return "Hello, " + person;
+  return "Hello, " + person;
 }
 var user = "Jane User";
 greeter(user);
+```
+
+
+
+此时用IDE运行js文件即可！
+
+
+
+如果想要直接运行ts，可以使用 ts-node
+
+```bash
+npm install -g ts-node
+ts-node foo.ts
 ```
 
 
