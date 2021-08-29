@@ -73,8 +73,156 @@ console.log(bound());        // 2
 `this` 绑定有 4 种绑定规则：
 
 - 默认绑定
+
+  - 全局环境中，this默认绑定到window
+
+  - 函数独立调用时，this默认绑定到window
+
+  - 被嵌套的函数独立调用时，this默认绑定到window
+
+    ```js
+    // 这是在 Chrome 环境下！
+    let a = 0;
+    const obj = {
+      a : 2,
+      foo:function(){
+        function test(){
+          console.log(this.a);
+        }
+        test();    //虽然test()函数被嵌套在obj.foo()函数中，但test()函数是独立调用，而不是方法调用。所以this默认绑定到window
+      }
+    }
+    obj.foo();//0
+    ```
+
+  - 【闭包】类似地，test()函数是独立调用，而不是方法调用，所以this默认绑定到window
+
 - 隐式绑定
+
+  - 当函数作为对象里的方法被调用时， `this` 是调用该函数的对象
+
+    ```js
+    function foo(){
+      console.log(this.a);
+    }
+    const obj1 = {
+      a:1,
+      foo:foo,
+      obj2:{
+        a:2,
+        foo:foo
+      }
+    }
+    
+    //foo()函数的直接对象是obj1，this隐式绑定到obj1
+    obj1.foo();//1
+    
+    //foo()函数的直接对象是obj2，this隐式绑定到obj2
+    obj1.obj2.foo();//2
+    ```
+
+  - 隐式丢失是指被隐式绑定的函数丢失绑定对象，从而默认绑定到window。这种情况容易出错！
+
+    - 函数别名
+
+      ```js
+      var a = 0;
+      function foo(){
+        console.log(this.a);
+      };
+      var obj = {
+        a : 2,
+        foo:foo
+      }
+      //把obj.foo赋予别名bar，造成了隐式丢失，因为只是把foo()函数赋给了bar，而bar与obj对象则毫无关系
+      var bar = obj.foo;
+      bar();//0
+      
+      //等价于
+      var a = 0;
+      var bar = function foo(){
+        console.log(this.a);
+      }
+      bar();//0
+      ```
+
+    - 参数传递
+
+      ```js
+      var a = 0;
+      function foo(){
+        console.log(this.a);
+      };
+      function bar(fn){
+        fn();
+      }
+      var obj = {
+        a : 2,
+        foo:foo
+      }
+      //把obj.foo当作参数传递给bar函数时，有隐式的函数赋值fn=obj.foo。与上例类似，只是把foo函数赋给了fn，而fn与obj对象则毫无关系
+      bar(obj.foo);//0
+      ```
+
+    - 内置函数
+
+      ```js
+      var a = 0;
+      function foo(){
+        console.log(this.a);
+      };
+      var obj = {
+        a : 2,
+        foo:foo
+      }
+      setTimeout(obj.foo,100);//0
+      
+      //等价于
+      var a = 0;
+      setTimeout(function foo(){
+        console.log(this.a);
+      },100);//0
+      ```
+
+    - 其他情况： 在javascript引擎内部，obj和obj.foo储存在两个内存地址，简称为M1和M2。只有obj.foo()这样调用时，是从M1调用M2，因此this指向obj。但是，下面三种情况，都是直接取出M2进行运算，然后就在全局环境执行运算结果（还是M2），因此this指向全局环境
+
+      ```js
+      var a = 0;
+      var obj = {
+        a : 2,
+        foo:foo
+      };
+      function foo() {
+        console.log( this.a );
+      };
+      
+      (obj.foo = obj.foo)(); //0
+      (false || obj.foo)();  //0
+      (1, obj.foo)();        //0
+      ```
+
+      
+
 - 显式绑定
+
+  - 通过call()、apply()、bind()方法把对象绑定到this上，叫做显式绑定。对于被调用的函数来说，叫做间接调用
+
+  - javascript中新增了许多内置函数，具有显式绑定的功能，如数组的：map()、forEach()、filter()、some()、every()
+
+    ```js
+    var id = 'window';
+    function foo(el){
+      console.log(el,this.id);
+    }
+    var obj = {
+      id: 'fn'
+    };
+    [1,2,3].forEach(foo);//1 "window" 2 "window" 3 "window"
+    [1,2,3].forEach(foo,obj);//1 "fn" 2 "fn" 3 "fn"
+    ```
+
+    
+
 - new 绑定
 
 四种绑定规则的优先级从上到下，依次递增，默认绑定优先级最低，`new` 绑定最高。但现在使用new会出现问题

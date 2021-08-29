@@ -232,57 +232,57 @@ const deepClone = (target, map = new Map()) => {
 ```js
 const isComplexDataType = obj => (obj instanceof Object && typeof obj !== 'function')
 const deepClone = function(obj, hash = new WeakMap()) {
-	if (!isComplexDataType(obj)){  //基础类型,包括null和undefined
-		return obj;
-	}else {
+  if (!isComplexDataType(obj)){  //基础类型,包括null和undefined
+    return obj;
+  }else {
     //防止循环引用
-		if (hash.has(obj)) return hash.get(obj)
-    
-		let constructor=obj.constructor;
-		//这里是为了得到所有的数据描述符的值,[Configurable],[Enumerable],[Writable],[Value]等
-		const allDesc = Object.getOwnPropertyDescriptors(obj);
-		let cloneObj;
+    if (hash.has(obj)) return hash.get(obj)
 
-		//Date和RegExp
-		if (/^(Date|RegExp)$/i.test(constructor.name)){
-			cloneObj=new constructor(obj);
-			Object.defineProperties(cloneObj,allDesc);
-			return cloneObj;
-		}
-		//WeakMap和WeakSet不支持遍历, 没法copy
-		//Map
-		if (constructor.name==='Map'){
-			cloneObj=new constructor();
-			Object.defineProperties(cloneObj,allDesc);
-			obj.forEach((value,key)=>{
-				cloneObj.set(key,deepClone(value,hash));
-			})
-			return cloneObj;
-		}
+    let constructor=obj.constructor;
+    //这里是为了得到所有的数据描述符的值,[Configurable],[Enumerable],[Writable],[Value]等
+    const allDesc = Object.getOwnPropertyDescriptors(obj);
+    let cloneObj;
 
-		//Set
-		if (constructor.name==='Set'){
-			cloneObj=new constructor();
-			Object.defineProperties(cloneObj,allDesc);
-			obj.forEach((value)=>{
-				cloneObj.add(deepClone(value,hash));
-			})
-			return cloneObj;
-		}
-		
+    //Date和RegExp
+    if (/^(Date|RegExp)$/i.test(constructor.name)){
+      cloneObj=new constructor(obj);
+      Object.defineProperties(cloneObj,allDesc);
+      return cloneObj;
+    }
+    //WeakMap和WeakSet不支持遍历, 没法copy
+    //Map
+    if (constructor.name==='Map'){
+      cloneObj=new constructor();
+      Object.defineProperties(cloneObj,allDesc);
+      obj.forEach((value,key)=>{
+        cloneObj.set(key,deepClone(value,hash));
+      })
+      return cloneObj;
+    }
+
+    //Set
+    if (constructor.name==='Set'){
+      cloneObj=new constructor();
+      Object.defineProperties(cloneObj,allDesc);
+      obj.forEach((value)=>{
+        cloneObj.add(deepClone(value,hash));
+      })
+      return cloneObj;
+    }
+
     //这里就是简单的对象Object or Array
-    
-		//Object.create原本是创建一个新对象,并将第一个参数作为新对象的__proto__
-		//结合Descriptors方法后可以用第二个参数指定数据描述符
-		//这样一来也考虑了数组
-		cloneObj = Object.create(Object.getPrototypeOf(obj), allDesc)
-		hash.set(obj, cloneObj)
 
-		for (let key of Reflect.ownKeys(obj)) {
-			cloneObj[key] = deepClone(obj[key], hash);
-		}
-		return cloneObj
-	}
+    //Object.create原本是创建一个新对象,并将第一个参数作为新对象的__proto__
+    //结合Descriptors方法后可以用第二个参数指定数据描述符
+    //这样一来也考虑了数组
+    cloneObj = Object.create(Object.getPrototypeOf(obj), allDesc)
+    hash.set(obj, cloneObj)
+
+    for (let key of Reflect.ownKeys(obj)) {
+      cloneObj[key] = deepClone(obj[key], hash);
+    }
+    return cloneObj
+  }
 }
 ```
 
@@ -299,38 +299,38 @@ const deepClone = function(obj, hash = new WeakMap()) {
 
 ```js
 const items = new Map([
-	["key1", "val1"],
-	["key2", "val2"],
-	["key3", "val3"]
+  ["key1", "val1"],
+  ["key2", "val2"],
+  ["key3", "val3"]
 ]);
 
 let setTest = new Set([1, 2, 3,items]);
 let s=Symbol(123);
 const target = {
-	field1: new Date(),
-	field2: function (n) {
-		console.log(n);
-	},
-	field3: 'ConardLi',
-	field4: {
-		child: 'child',
-		child2: {
-			child2: [1,'child2']
-		}
-	},
-	[s]:'symbol',
-	map:items,
-	set:setTest
+  field1: new Date(),
+  field2: function (n) {
+    console.log(n);
+  },
+  field3: 'ConardLi',
+  field4: {
+    child: 'child',
+    child2: {
+      child2: [1,'child2']
+    }
+  },
+  [s]:'symbol',
+  map:items,
+  set:setTest
 };
 target.target=target;
 let copy=deepClone(target);
-console.log(copy);  
+console.log(copy);
 console.log(target.set.has(items))   //true
 console.log(copy.set.has(items))     //false
 console.log(copy.field4.child2 === target.field4.child2);           //false
 console.log(copy.field2 === target.field2);                         //true
 console.log(Reflect.ownKeys(target)[4]===Reflect.ownKeys(copy)[4])  //true
-console.log(copy.target===copy);                                    //true
+console.log(copy.target===copy);  
 ```
 
 可以看见满足了大多数场景!
@@ -385,5 +385,5 @@ Object.getOwnPropertyDescriptor(res, 'field3').configurable;     //true
 
 内心os：这恐怖的压迫感再也不想有了！😭😭😭
 
-![sad2](deepClone.assets\sad2.png)
+![](https://raw.githubusercontent.com/shanxiansen310/picgo/main/img/sad2.png?token=AKNIHMOPBLEB5RYQAEISBL3BFHVD4)
 
