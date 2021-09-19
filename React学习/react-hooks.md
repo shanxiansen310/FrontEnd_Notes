@@ -696,7 +696,7 @@ class Counter extends React.Component {
 
 这也可以说是useState异步回调的问题！
 
-当使用usestate对数据进行更新，并不能立刻获取到最新的数据。
+当使用useState对数据进行更新，并不能立刻获取到最新的数据。
 
 ```jsx
   const [name, setName] = useState('dx');
@@ -707,6 +707,8 @@ class Counter extends React.Component {
     console.log(name) // dx
   }
 ```
+
+
 
 
 
@@ -1185,10 +1187,6 @@ ChatAPI.unsubscribeFromFriendStatus(300, handleStatusChange); // 清除最后一
 
 
 
-
-
-
-
 ##### 3.如何跳过effect❓
 
 
@@ -1572,8 +1570,6 @@ const refContainer = useRef(initialValue);
 
 2.一般用于DOM操作，类似于以前的createRef
 
-
-
 ```jsx
 function TextInputWithFocusButton() {
   const inputEl = useRef(null);
@@ -1955,7 +1951,6 @@ function CalculateFactorial() {
   const [number, setNumber] = useState(1);
   const [inc, setInc] = useState(0);
 
-  // const factorial = factorialOf(number);
   const factorial = factorialOf(number);
 
   const onChange = event => {
@@ -2019,6 +2014,131 @@ useMemo的作用：
 
 
 
+2.useMemo 和 React.memo
+
+
+
+
+
+useMemo
+
+```jsx
+export function MyReactComponent({ myNumber }) {
+  const result = useMemo(() => myNumber * 5, [myNumber])
+  return <p>{result}</p>
+}
+```
+
+
+
+React.memo
+
+```jsx
+export function MyReactComponent({ myNumber }) {
+  return <p>{myNumber * 5}</p>
+}
+
+export default React.memo(MyReactComponent, function areEqual(
+  prevProps,
+  nextProps
+) {
+  if (prevProps.myNumber !== nextProps.myNumber) {
+    return false
+  }
+  return true
+})
+```
+
+In React.memo you need to provide your react component as well as an optional function to handle when it should be updated.
+
+If you don’t provide the optional function <span style='color:red;'>React.memo will automatically shallowly compare your props and re-render whenever they change.</span> 
+
+
+
+举个例子来对比下两者的使用：
+
+▼useMemo：
+
+```jsx
+import React,{useEffect,useState,useCallback,useMemo} from "react";
+//子元素
+const Child = ({callback}) => {
+  const [count, setCount] = useState(() => callback());
+  alert('更新了');
+  useEffect(() => {
+      setCount(callback());
+  }, [callback]);
+  return <div>
+      {count}
+  </div>
+}
+
+//父元素
+export default function App() {
+  const [count, setCount] = useState(1);
+  const [val, setVal] = useState('');
+
+  const callback = useCallback(() => {
+      return count;
+  }, [count]);
+
+  const Children = useMemo(() => <Child callback={callback}/>,[callback]);
+
+  return <div>
+      <h4>{count}</h4>
+      {
+        Children
+      }
+      <div>
+          <button onClick={() => setCount(count + 1)}>+</button>
+          <input value={val} onChange={event => setVal(event.target.value)}/>
+      </div>
+  </div>;
+}
+
+```
+
+
+
+React.memo
+
+```jsx
+// 子元素
+const Child = React.memo(({ callback }) => {
+  const [count, setCount] = useState(() => callback());
+  alert('更新了');
+  useEffect(() => {
+      setCount(callback());
+  }, [callback]);
+  return <div>
+      {count}
+  </div>
+})
+//父元素
+export default function App() {
+  const [count, setCount] = useState(1);
+  const [val, setVal] = useState('');
+
+  const callback = useCallback(() => {
+      return count;
+  }, [count]);
+
+  return <div>
+      <h4>{count}</h4>
+      <Child callback={callback}/>
+      <div>
+          <button onClick={() => setCount(count + 1)}>+</button>
+          <input value={val} onChange={event => setVal(event.target.value)}/>
+      </div>
+  </div>;
+}
+
+```
+
+
+
+
+
 
 
 
@@ -2035,7 +2155,7 @@ useMemo的作用：
 
 useMemo 解决了值的缓存的问题，那么函数呢？ useCallback和useMemo作用相似，只不过是为了解决函数❗️
 
-
+<span id='useCallback'></span>
 
 下面这个🌰就是，当点击count的按钮，Effect组件render，遇到了：
 
@@ -2048,6 +2168,7 @@ const onChange=(e)=>{
 虽然子组件Child什么都没有变但还是会被重新渲染！
 
 ```jsx
+import React, {useState, memo} from 'react';
 const Child = memo(({data, onChange}) =>{
   console.log('child render...')
   return (
@@ -2081,7 +2202,22 @@ const Hook =()=>{
 
 
 
+<iframe src="https://codesandbox.io/embed/sharp-tess-1fyo2?fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="sharp-tess-1fyo2"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+
+
 因此我们要使用 useCallback来解决这个问题！
+
+
+
+
+
+
 
 
 
@@ -2118,7 +2254,7 @@ const onChange=useCallback((e)=>{
 
 
 
-💎关于这里的 dps数组你可以根据你的需要来传递参数，这里传递空数组表示怎么变化都不会出发Child子组件的重新渲染。 但如果你想要通过用户输入在Child组件中进行操作，可以传入 $[text]$
+💎关于这里的 dps数组你可以根据你的需要来传递参数，这里传递空数组表示父组件怎么变化都不会出发Child子组件的重新渲染。 但如果你想要通过用户输入在Child组件中进行操作，可以传入 $[text]$
 
 
 
@@ -2159,6 +2295,8 @@ const memoCallback = useMemo(() => (...args) => {
 
 
 😄2.没有依赖，添加空的依赖，就是空数组！
+
+也就是说只执行一次！
 
 
 
@@ -2209,17 +2347,19 @@ module.exports = {
 
 
 1. 当函数、对象直接传给 DOM 组件（div,span,imgs），不要使用 useMemo/useCallback。React 并不关心 DOM 组件的 prop 的函数、对象的引用是否变更。**除了 ref 函数**。因为 ref 函数在两次渲染前后引用不相等，会先使用 null 调用一次旧的 ref，再使用组件 reference 调用一次新的 ref 函数（为了回收副作用）
-
+   
 2. 当函数、对象直接传给叶子组件或组件包含引用类型的 children 传参时，不要使用 useMemo/useCallback。通常情况下，叶子组件都不会使用 React.memo，而 children 每次引用都会变，所以这些组件其实并不 care 传入的函数、对象是否引用有变更
-
+   
 3. 不要将一个明显每次渲染都是新的变量作为 useCallback/useMemo。比如：
 
-4. ```js
+   ```js
    const x = ['hello'];
    const cb = useCallback(noop, [prop1, prop2, x]);
    ```
 
-   当函数、对象传入的组件不关心是否是个新的引用时，不要使用 useMemo/useCallback（你需要查看组件的源码，确认没有使用 React.memo/PureComponent 并且同步访问最新的 prop 传参，或者直接将 prop 透传给 DOM 或者叶子节点组件）。还要考虑你是否每次都传了一个没有缓存的新的 children。
+   
+
+4. 当函数、对象传入的组件不关心是否是个新的引用时，不要使用 useMemo/useCallback（你需要查看组件的源码，确认没有使用 React.memo/PureComponent 并且同步访问最新的 prop 传参，或者直接将 prop 透传给 DOM 或者叶子节点组件）。还要考虑你是否每次都传了一个没有缓存的新的 children。
 
 
 
@@ -2795,6 +2935,19 @@ useEffect(() => {
 
 
 
+#### useCallback使用场景
+
+
+
+
+
+##### references
+
+[useCallback使用场景 · Issue #26 · xianzou/blog (github.com)](https://github.com/xianzou/blog/issues/26)
+
+[【译】什么时候使用 useMemo 和 useCallback - 键落云起 (jancat.github.io)](https://jancat.github.io/post/2019/translation-usememo-and-usecallback/)
+
+[你不知道的 useCallback - SegmentFault 思否](https://segmentfault.com/a/1190000020108840)
 
 
 
@@ -2802,20 +2955,412 @@ useEffect(() => {
 
 
 
+##### 场景一
+
+
+
+父组件向子组件传递函数时, 阻止传递的函数在每次 render 时重新创建，从而造成子组件 rerender。需要配合 React.memo一起使用。（也可以用useEffect来控制）
+
+
+
+也可以看看useCallback里的 [why](#useCallback)
+
+
+
+e.g.1  配合useEffect
+
+
+
+```jsx
+// 用于记录 getData 调用次数
+let count = 0;
+
+function App() {
+  const [val, setVal] = useState("");
+
+  function getData() {
+    setTimeout(()=>{
+      setVal('new data '+count);
+      count++;
+    }, 500)
+  }
+
+  useEffect(()=>{
+    getData();
+  }, []);
+
+  return (
+    <div>{val}</div>
+  );
+}
+```
+
+`getData`模拟发起网络请求。在这种场景下，没有`useCallback`什么事，组件本身是高内聚的。
+
+😊 啥意思呢？ 就是这里的getData函数就在这个组件中不会改变，因此useEffect无依赖项只需要调用一次！（这只是个网络请求，在组件渲染时getData不发生变化只需要调用一次！）
+
+
+
+😨如果涉及到组件通讯（也就是本场景父组件向子组件传递函数），情况就不一样了：
+
+```jsx
+// 用于记录 getData 调用次数
+let count = 0;
+
+function App() {
+  const [val, setVal] = useState("");
+
+  function getData() {
+    setTimeout(() => {
+      setVal("new data " + count);
+      count++;
+    }, 500);
+  }
+
+  return <Child val={val} getData={getData} />;
+}
+
+function Child({val, getData}) {
+  useEffect(() => {
+    getData();
+  }, [getData]);
+
+  return <div>{val}</div>;
+}
+```
+
+
+
+此时模拟的网络请求getData会被反复调用，然而我们本意是在getData不变化的情况下只调用一次！
+
+ps：为什么getData会变化，useEffect依赖中需要加入getData❓
+
+因为会遇到根据具体条件传函数的情况！如果情况变了，子组件也要进行相应更新！
+
+```js
+const getData = condition ? useRefCallback(fn1, [val]) : useRefCallback(fn2, [val])
+```
+
+
+
+先来分析下这段代码的用意，`Child`组件是一个纯展示型组件，其业务逻辑都是通过外部传进来的，这种场景在实际开发中很常见。
+
+再分析下代码的执行过程：
+
+1. `App`渲染`Child`，将`val`和`getData`传进去
+2. `Child`使用`useEffect`获取数据。因为对`getData`有依赖，于是将其加入依赖列表
+3. `getData`执行时，调用`setVal`，导致`App`重新渲染
+4. `App`重新渲染时生成新的`getData`方法，传给`Child`
+5. `Child`发现`getData`的引用变了，又会执行`getData`
+6. 3 -> 5 是一个死循环
+
+
+
+😅如果明确`getData`只会执行一次，最简单的方式当然是将其从依赖列表中删除。但如果装了 hook 的lint 插件，会提示：`React Hook useEffect has a missing dependency`
+
+```jsx
+useEffect(() => {
+  getData();
+}, []);
+```
+
+
+
+**实际情况很可能是当`getData`改变的时候，是需要重新获取数据的**。这时就需要通过`useCallback`来将引用固定住：
+
+```jsx
+const getData = useCallback(() => {
+  setTimeout(() => {
+    setVal("new data " + count);
+    count++;
+  }, 500);
+}, []);
+```
+
+<span style='color:red;font-weight:bold;'>上面例子中`getData`的引用永远不会变，因为它的依赖列表是空。可以根据实际情况将依赖加进去，就能确保依赖不变的情况下，函数的引用保持不变。</span> 
+
+
+
+e.g.2 配合React.Memo
+
+
+
+```jsx
+const Child = React.memo(function({val, onChange}) {
+  console.log('render...');
+  
+  return <input value={val} onChange={onChange} />;
+});
+
+function App() {
+  const [val1, setVal1] = useState('');
+  const [val2, setVal2] = useState('');
+
+  const onChange1 = useCallback( evt => {
+    setVal1(evt.target.value);
+  }, []);
+
+  const onChange2 = useCallback( evt => {
+    setVal2(evt.target.value);
+  }, []);
+
+  return (
+  <>
+    <Child val={val1} onChange={onChange1}/>
+    <Child val={val2} onChange={onChange2}/>
+  </>
+  );
+}
+```
+
+★ 上面的例子中，如果不用`useCallback`, 任何一个输入框的变化都会导致另一个输入框重新渲染。
 
 
 
 
 
+##### 场景二
+
+以来state的useCallback
+
+
+
+```jsx
+// 用于记录 getData 调用次数
+let count = 0;
+
+function App() {
+  const [val, setVal] = useState("");
+
+  function getData() {
+    setTimeout(() => {
+      setVal("new data " + count);
+      count++;
+    }, 500);
+  }
+
+  return <Child val={val} getData={getData} />;
+}
+
+function Child({val, getData}) {
+  useEffect(() => {
+    getData();
+  }, [getData]);
+
+  return <div>{val}</div>;
+}
+```
+
+
+
+假如在`getData`中需要用到`val`( useState 中的值)，就需要将其加入依赖列表，这样的话又会导致每次`getData`的引用都不一样，死循环又出现了...
+
+```jsx
+const getData = useCallback(() => {
+  console.log(val);
+
+  setTimeout(() => {
+    setVal("new data " + count);
+    count++;
+  }, 500);
+}, [val]);
+```
+
+
+
+如果我们希望无论`val`怎么变，`getData`的引用都保持不变，同时又能取到`val`最新的值，可以通过自定义 hook 实现。注意这里不能简单的把`val`从依赖列表中去掉，否则`getData`中的`val`永远都只会是初始值（闭包原理）。
+
+```jsx
+function useRefCallback(fn, dependencies) {
+  const ref = useRef(fn);
+
+  // 每次调用的时候，fn 都是一个全新的函数，函数中的变量有自己的作用域
+  // 当依赖改变的时候，传入的 fn 中的依赖值也会更新，这时更新 ref 的指向为新传入的 fn
+  useEffect(() => {
+    ref.current = fn;
+  }, [fn, ...dependencies]);
+
+  return useCallback(() => {
+    const fn = ref.current;
+    return fn();
+  }, [ref]);
+}
+```
+
+
+
+使用：
+
+```jsx
+const getData = useRefCallback(() => {
+  console.log(val);
+
+  setTimeout(() => {
+    setVal("new data " + count);
+    count++;
+  }, 500);
+}, [val]);
+```
 
 
 
 
 
+完整代码：
+
+```jsx
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import ReactDOM from "react-dom";
+
+// 用于记录 getData 调用次数
+let count = 0;
+
+function useRefCallback(fn, dependencies) {
+  const ref = useRef(fn);
+
+  useEffect(() => {
+    ref.current = fn;
+  }, [fn, ...dependencies]);
+
+  return useCallback(() => {
+    const fn = ref.current;
+    return fn();
+  }, [ref]);
+}
+
+function App() {
+  const [val, setVal] = useState("");
+
+  const getData = useRefCallback(() => {
+    console.log(val);
+
+    setTimeout(() => {
+      setVal("new data " + count);
+      count++;
+    }, 500);
+  }, [val]);
+
+  return <Child val={val} getData={getData} />;
+}
+
+function Child({ val, getData }) {
+  useEffect(() => {
+    getData();
+  }, [getData]);
+
+  return <div>{val}</div>;
+}
+
+const rootElement = document.getElementById("root");
+ReactDOM.render(<App />, rootElement);
+
+```
+
+
+
+##### 🥺反例
+
+一般会觉得使用`useCallback`的性能会比普通重新定义函数的性能好， 如下面例子：
+
+```javascript
+function App() {
+  const [val, setVal] = useState("");
+
+  const onChange = (evt) => {
+    setVal(evt.target.value);
+  };
+
+  return <input val={val} onChange={onChange} />;
+}
+```
+
+将`onChange`改为：
+
+```javascript
+const onChange = useCallback(evt => {
+  setVal(evt.target.value);
+}, []);
+```
+
+实际性能会更差，可以在[这里](https://link.segmentfault.com/?url=https%3A%2F%2Fcodesandbox.io%2Fs%2Ftest-usecallback-xqvuc)自行测试。究其原因，上面的写法几乎等同于下面：
+
+```javascript
+const temp = evt => {
+  setVal(evt.target.value);
+};
+const onChange = useCallback(temp, []);
+```
+
+可以看到`onChange`的定义是省不了的，而且额外还要加上调用`useCallback`产生的开销，性能怎么可能会更好？
+
+
+
+还可以再看看这个示例更清晰：
+
+```jsx
+const dispense = candy => {
+  setCandies(allCandies => allCandies.filter(c => c !== candy))
+}
+const dispenseCallback = React.useCallback(dispense, [])
+```
+
+
+
+这是原来的：
+
+```jsx
+const dispense = candy => {
+  setCandies(allCandies => allCandies.filter(c => c !== candy))
+}
+```
+
+让我们看一下 diff：
+
+```diff
+const dispense = candy => {
+    setCandies(allCandies => allCandies.filter(c => c !== candy))
+  }
++ const dispenseCallback = React.useCallback(dispense, [])
+```
+
+是的，除了`useCallback`版本做了更多的工作之外，它们完全相同。 我们不仅需要定义函数，还要定义一个数组（`[]`）并调用 `React.useCallback`，它本身会设置属性和运行逻辑表达式等。
+
+
+
+❓你可能在疑惑我这个使用了useCallback后dispense不应该就是上一次的吗？ 只是第一次开销大啊，以后开销就小了。
+
+🤓可惜不是如此，useCallback只是保证引用一致，该重新定义函数还是会重新定义！ 因此re-render时还是会再次定义函数！ 如果不是要传递给子组件保证引用相等之类的情况，只会徒增消耗！
+
+
+
+⭐️比如这里就是解决引用相等的正确用法：
+
+```jsx
+function Foo({bar, baz}) {
+  React.useEffect(() => {
+    const options = {bar, baz}
+    buzz(options)
+  }, [bar, baz])
+  return <div>foobar</div>
+}
+
+function Blub() {
+  const bar = React.useCallback(() => {}, [])
+  const baz = React.useMemo(() => [1, 2, 3], [])
+  return <Foo bar={bar} baz={baz} />
+}
+```
 
 
 
 
+
+💎Summary：
+
+真正有助于性能改善的，有 2 种场景：
+
+- 函数`定义`时需要进行大量运算， 这种场景极少
+- 需要比较引用的场景，如上文提到的`useEffect`，又或者是配合`React.Memo`使用：
 
 
 

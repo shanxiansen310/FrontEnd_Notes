@@ -1057,6 +1057,39 @@ class LoggingButton extends React.Component {
 
 
 
+```js
+class Bork {
+  //Property initializer syntax
+  instanceProperty = "bork";
+  boundFunction = () => {
+    return this.instanceProperty;
+  };
+
+  //Static class properties
+  static staticProperty = "babelIsCool";
+  static staticFunction = function() {
+    return Bork.staticProperty;
+  };
+}
+
+let myBork = new Bork();
+
+//Property initializers are not on the prototype.
+console.log(myBork.__proto__.boundFunction); // > undefined
+
+//Bound functions are bound to the class instance.
+console.log(myBork.boundFunction.call(undefined)); // > "bork"
+
+//Static function exists on the class.
+console.log(Bork.staticFunction()); // > "babelIsCool"
+```
+
+💎其实这里就相当于是实例属性了，箭头函数在这里类似 const boundFunction= () => {} ，属于类的一个实例属性！
+
+
+
+
+
 2.回调中使用箭头函数
 
 ```jsx

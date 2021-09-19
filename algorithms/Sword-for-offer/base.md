@@ -4756,27 +4756,27 @@ class Heap{
   }
 
   insert(data){
-    const  {container,cmp}=this;
+    const  { container, cmp } = this;
     container.push(data);
-    let index=container.length-1;
+    let index = container.length-1;
     //建立大顶堆/小顶堆
     while (index) {
       let parent = Math.floor((index - 1) / 2);
       if (!cmp(container[index],container[parent])){
         return;
       }
-      swap(container,index,parent);
+      swap(container, index, parent);
       index=parent;
     }
   }
 
   extract(){
-    const  {container,cmp}=this;
+    const { container, cmp } = this;
     if (!container.length) return null;
     swap(container,0,container.length-1);
     const res=container.pop();  //得到结果
 
-    //调整堆
+    // 调整堆
     const length=container.length;
     let index=0,exchange=index*2+1;
     while (exchange<length){
@@ -5159,7 +5159,7 @@ const countDigitOne = function(n) {
 
 难度中等
 
-数字以0123456789101112131415…的格式序列化到一个字符序列中。在这个序列中，第5位（从下标0开始计数）是5，第13位是1，第19位是4，等等。
+数字以 0123456789101112131415… 的格式序列化到一个字符序列中。在这个序列中，第5位（从下标0开始计数）是5，第13位是1，第19位是4，等等。
 
 请写一个函数，求任意第n位对应的数字。
 
@@ -5229,21 +5229,21 @@ const findNthDigit = function (n) {
 }
 ```
 
+★ Math.pow(10, digit-1)：先算出来目前的位数，也就是起始位置，比如100，1000还是10000
+
+★ Math.floor(n / digit)：判断是在从前面起始位置开始的第几个数字
+
+★ n % digit：判断是那个数字开始的第几位
+
+
+
+
+
 
 
 😈我们首先确认下 $n - count$ 是什么意思？  比如n=10就是第10位，此时我们减去count=10就变成了第0位，而 $n-count+1$ 是表示减去count后剩下的数字数量，比如 10-10+1，表示就剩下了一个数字！
 
-⭐️这里我们采用的是 $n-count$， 因为最后剩下求具体位置的时候是要从0开始的，也就是说我们的n仍要表示是剩下的数字中的第几位！
-
-
-
-
-
-
-
-
-
-
+⭐️这里我们采用的是 $n-count$， 因为最后剩下求具体位置的时候是要从0开始的，也就是说我们的n仍要表示是剩下的数字中的第几位
 
 
 
@@ -5574,7 +5574,7 @@ var translateNum = function(num) {
 
 🌟先把题目具体范围判断好!!!   
 
-符合两个数的条件 [10,25]    03类似的不行!!!
+符合两个数的条件 [10, 25]    03类似的不行!!!
 
 **时间复杂度: O(n) **每个数都要遍历一次
 
@@ -5660,11 +5660,9 @@ const translateNumTail = function (num) {
 }
 ```
 
-
-
 这里的尾递归和上面其实差不多，关键就是把个数传进了参数保存！
 
-这里a的作用是记录上一个数字便于后面计算，因此每次都是b。
+这里a的作用是记录上一个数字便于后面计算，因此每次都是b。或者说可以从 n-2跳到n 则需要加上a，否则只需要加上b 
 
 这里b的作用是记录 $[0,n)$ 可以翻译的种类数，如果可以从 [n-2,n) 满足则是a+b，否则还是只能是 b。
 
@@ -5756,6 +5754,35 @@ var maxValue = function(grid) {
     return dp[m][n];
 };
 ```
+
+
+
+二刷：贴一个直接在原数组修改的版本
+
+```js
+/**
+ * @param {number[][]} grid
+ * @return {number}
+ */
+const maxValue = function(grid){
+  const len1 = grid.length, len2 = grid[0].length
+  for (let i = 0; i < len1; i++) {
+    for (let j = 0; j < len2; j++) {
+      const top = grid[i-1]?.[j] ?? 0, left = grid[i]?.[j-1] ?? 0
+      grid[i][j] += top > left ? top : left
+    }
+  }
+  return grid[len1-1][len2-1]
+}
+```
+
+★假设number是一个二维数组，这里就不在开头进行校验了
+
+
+
+
+
+
 
 
 
@@ -5884,6 +5911,35 @@ var lengthOfLongestSubstring = function(s) {
 **▼剑指重刷:**
 
 <span style="font-weight:bold; color:red;">感觉这道题的关键在于map来记录上一次出现的位置</span>
+
+
+
+```js
+/**
+ * @param {string} s
+ * @return {number}
+ */
+const lengthOfLongestSubstring = function(s){
+  if (s.length === 0) return 0
+  let maxLen = 0, start = -1
+  const hash = new Map()
+  for (let i = 0; i < s.length; i++) {
+    if (hash.has(s[i])){
+      start = Math.max(hash.get(s[i]), start)
+    }
+    maxLen = Math.max(maxLen, i - start)
+    hash.set(s[i],i)
+  }
+  return maxLen
+}
+```
+
+★之前我还区分了  hash.has(s[i]) ，但发现不管是不是都需要进行
+
+maxLen = Math.max(maxLen, i - start)
+hash.set(s[i],i)
+
+
 
 
 
