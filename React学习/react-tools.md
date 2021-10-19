@@ -291,11 +291,21 @@ var btnClass = classNames('btn', this.props.className, {
 
 
 
+## Tips
 
 
 
+### px ➡️ rem
 
 
+
+DOU+项目转换
+
+```scss
+@function rem($px) {
+  @return ($px / 100px) * 2rem;
+}
+```
 
 
 

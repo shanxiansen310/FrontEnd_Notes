@@ -82,7 +82,7 @@ npx create-react-app my-app
 
 出现下面的内容就表示成功了：
 
-<img src="base.assets/image-20210711195700409.png" alt="image-20210711195700409" style="zoom: 50%;" />
+ <img src="base.assets/image-20210711195700409.png" alt="image-20210711195700409" style="zoom: 50%;" />
 
 
 
@@ -3618,6 +3618,282 @@ const { current: dispatch } = useRef((action) => {
 > 如果要做一些骚操作，需要再封装一次 useReducer 的 dispatch。所以这里我一般用 useState 来承载 reducer 逻辑，方便在函数中插入特殊需求（比如做变更日志记录、undo、redo）
 
 如果代码中，有许多 deps 来自于不同的 useState，那就可以通过把 useState 合并在一起，通过 setState 传入函数，来获取当前最新 state 的状态，从而减少这部分的 deps。
+
+
+
+
+
+#### 2.Mixin的取消和装饰器的缺点
+
+
+
+Why Mixins are Broken？
+
+
+
+* mixin在组件越来越复杂的情况下会带来困扰
+* mixin会使新开发者上手项目变得困难
+* mixin在react中有很多问题且不是必要的
+
+
+
+**Mixin引入了难以发现的依赖：**
+
+比如你在组件中添加进去了一个state，同时通过一个mixin读取了这个state。在一段时间后后你将这个state提取到父组件并作为props传递给该组件时不一定会记住同时去更新mixin！ 也就是这种潜在的依赖很难让人注意到！并且ESLint也无法提示（装饰器也是同样的原理）
+
+有时一个mixin依赖于另一个mixin，移除掉一个同时会破坏掉另一个，十分麻烦！
+
+
+
+
+
+**Mixin会造成命名冲突：**
+
+
+
+在MixinOne中定义了一个handle方法，同时又在MixinTwo中定义了一个handle方法，此时你就无法同时使用这两种方法。
+
+或许可以自己去改名字来避免，但这很不方便！因为可能这个Mixin在其他组件中也有用到，你需要去改很多地方！并且还会将名称改的不那么清晰！
+
+
+
+**Mixin会造成难以预计的复杂度：**
+
+
+
+这里照搬React Blog的一个例子：[Mixins Considered Harmful – React Blog (reactjs.org)](https://reactjs.org/blog/2016/07/13/mixins-considered-harmful.html)
+
+A component needs some state to track mouse hover. To keep this logic reusable, you might extract `handleMouseEnter()`, `handleMouseLeave()` and `isHovering()` into a `HoverMixin`. Next, somebody needs to implement a tooltip. They don’t want to duplicate the logic in `HoverMixin` so they create a `TooltipMixin` that uses `HoverMixin`. `TooltipMixin` reads `isHovering()` provided by `HoverMixin` in its `componentDidUpdate()` and either shows or hides the tooltip.
+
+A few months later, somebody wants to make the tooltip direction configurable. In an effort to avoid code duplication, they add support for a new optional method called `getTooltipOptions()` to `TooltipMixin`. By this time, components that show popovers also use `HoverMixin`. However popovers need a different hover delay. To solve this, somebody adds support for an optional `getHoverOptions()` method and implements it in `TooltipMixin`. Those mixins are now tightly coupled.
+
+This is fine while there are no new requirements. However this solution doesn’t scale well. What if you want to support displaying multiple tooltips in a single component? You can’t define the same mixin twice in a component. What if the tooltips need to be displayed automatically in a guided tour instead of on hover? Good luck decoupling `TooltipMixin` from `HoverMixin`. What if you need to support the case where the hover area and the tooltip anchor are located in different components? You can’t easily hoist the state used by mixin up into the parent component. Unlike components, mixins don’t lend themselves naturally to such changes.
+
+
+
+每一个新的需求都会使Mixin更难去理解，使用Mixin的组件也会成倍的增长。许多新的功能也会被添加到所有使用Mixin的组件中！这里没办法简单的在Mixin部分中引入更多依赖项活着将Mixin分离为更简单的组件！逐渐封装组件的边界被淡化，因为很难去改变or移除现有的Mixin。而这会变的越来越抽象，直到没有人知道他们是怎么工作的！
+
+
+
+
+
+这里的Mixin其实也是装饰器的缺点！  <span style='color:red;font-weight:bold;'>装饰类在系统越来越复杂之后会出现明显的膨胀</span>
+
+装饰器本质上还是属于一种继承！JavaScript 中的装饰器和 Python 的装饰器类似，依赖于 `Object.defineProperty`，一般是用来装饰类、类属性、类方法。
+
+这是ES7的一个[提案](https://github.com/wycats/javascript-decorators)，目前Babel转码器已经支持。
+
+<div style="background-color: #fff7d3; border-left: 10px solid #ffe564;padding: 10px;">    <h5>注意⚠️</h5>    <span>装饰器目前还处于 stage-2，意味着语法之后也许会有变动。装饰器用于函数、对象等等已经有一些规划</span></div>
+
+
+
+
+
+#### 3.设置多个className
+
+
+
+在一个元素上设置样式，有一个固定的样式，然后还有一个使用三元运算符根据条件添加的样式。
+
+```react
+// 比如说有一个固定样式"title":
+<div className="title">标题</div>
+
+// 然后还要一个点击高亮的样式:
+<div className={index === this.state.active ? "active" : null}>标题</div>
+
+// 不能这样写：
+<div className="title" className={index === this.state.active ? "active" : null}>标题</div>
+```
+
+　　
+
+方法一：ES6 模板字符串 
+
+```react
+className={`title ${index === this.state.active ? 'active' : ''}`}
+```
+
+　　
+
+方法二：join("")
+
+```react
+className={["title", index === this.state.active?"active":null].join(' ')}
+```
+
+　　
+
+方法三：classnames(需要下载classnames)
+
+```react
+var classNames = require('classnames');
+ 
+var Button = React.createClass({
+  // ...
+  render () {
+    var btnClass = classNames({
+      btn: true,
+      'btn-pressed': this.state.isPressed,
+      'btn-over': !this.state.isPressed && this.state.isHovered
+    });
+    return <button className={btnClass}>{this.props.label}</button>;
+  }
+});
+```
+
+
+
+
+
+## 💣坑
+
+
+
+#### 1.React中使用防抖节流
+
+
+
+前置知识：[合成事件(SyntheticEvent) )](http://react.html.cn/docs/events.html)
+
+事件处理程序通过 合成事件（SyntheticEvent）的实例传递，`SyntheticEvent` 是浏览器原生事件跨浏览器的封装。`SyntheticEvent` 和浏览器原生事件一样有 `stopPropagation()`、`preventDefault()` 接口，而且这些接口夸浏览器兼容。
+
+`SyntheticEvent` 对象是通过合并得到的。 这意味着在事件回调被调用后，`SyntheticEvent` 对象将被重用并且所有属性都将被取消。 这是出于性能原因。 因此，无法以异步方式访问该事件。
+
+```react
+function onClick(event) {
+  console.log(event); // => nullified object.
+  console.log(event.type); // => "click"
+  const eventType = event.type; // => "click"
+
+  setTimeout(function() {
+    console.log(event.type); // => null
+    console.log(eventType); // => "click"
+  }, 0);
+
+  // 不能工作。 this.state.click 事件只包含空值。
+  this.setState({clickEvent: event});
+
+  // 您仍然可以导出事件属性。
+  this.setState({eventType: event.type});
+}
+```
+
+
+
+<div style="background-color: #fff7d3; border-left: 10px solid #ffe564;padding: 10px;">
+    <h5>注意⚠️</h5>
+    <span>如果要以异步方式访问事件属性，应该对事件调用 event.persist() ，这将从池中删除合成事件，并允许用户代码保留对事件的引用。</span>
+</div> 
+
+
+
+
+
+问题：
+
+在一个 `input` 输入框中，给其绑定了一个 `onChange` 事件，每次输入后，都会触发一个回调函数。因为我们想要的只是用户输入的最后结果，所以除了用户输入完成后触发的回调函数，其他都是冗余的。因此，需要对绑定的回调函数做 `debounce` 处理。
+
+关于 `debounce` 函数，有很多实现版本，这里选用了 `loadsh.debounce`。虽然函数实现原理很简单，但是用于生产环境的代码，还是建议使用成熟的第三方库。
+
+我们的第一反应，一般都是直接将回调函数用 `debounce` 包裹起来达到想要的效果。
+
+```react
+import react, { Component } from 'react';
+import { debounce } from 'lodash.debounce';
+
+export default class Debounce extends Component {
+  printChange(e) {
+    console.log('value :: ', e.target.value);
+    // call ajax
+  }
+  render() {
+    return (
+      <div>
+        <input onChange={debounce(this.printChange, 500)} />
+      </div>
+    );
+  }
+}
+```
+
+但是这么做之后，浏览器就会报异常: Uncaught TypeError: Cannot read property 'value' of null  或者是 This synthetic event is reused for performance reasons. If you're seeing this, you're accessing the  ...
+
+这里就涉及到了 `react` 事件系统 中的一个概念：合成事件
+
+
+
+如何解决呢？
+
+
+
+1.e.persist()
+
+通过在回调事件顶部加上 `e.persist()` 就可以从池中移除合成事件，并允许对事件的引用保留。
+
+我们需要把异步事件单独提取出来，然后传递e给异步事件
+
+```react
+import react, { Component } from 'react';
+import { debounce } from 'lodash.debounce';
+
+export default class Debounce extends Component {
+  construtor() {
+    super();
+    this.callAjax = debounce(this.callAjax, 300);
+  }
+  
+  callAjax = (value) => {
+    console.log('value :: ', value);
+    // call ajax
+  }
+  printChange(e) {
+    e.persist();
+    this.callAjax(e.target.value);
+  }
+  render() {
+    return (
+      <div>
+        <input onChange={this.printChange} />
+      </div>
+    );
+  }
+}
+```
+
+
+
+
+
+2.提前提取出需要的参数作为变量传递给异步函数
+
+```react
+import react, { Component } from 'react';
+import { debounce } from 'lodash.debounce';
+
+export default class Debounce extends Component {
+  construtor() {
+    super();
+    this.callAjax = debounce(this.callAjax, 300);
+  }
+  
+  callAjax = (value) => {
+    console.log('value :: ', value);
+    // call ajax
+  }
+  printChange(e) {
+    const { value } = e.target
+    this.callAjax(e.target.value);
+  }
+  render() {
+    return (
+      <div>
+        <input onChange={this.printChange} />
+      </div>
+    );
+  }
+}
+```
 
 
 

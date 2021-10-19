@@ -637,6 +637,59 @@ string, number等也可以看作是一个interface
 
 
 
+▼定义任意属性： （参考：[对象的类型——接口 ](https://ts.xcatliu.com/basics/type-of-object-interfaces.html)）
+
+有时候我们希望一个接口允许有任意的属性，可以使用如下方式：
+
+```ts
+interface Person {
+    name: string;
+    age?: number;
+    [propName: string]: any;
+}
+
+let tom: Person = {
+    name: 'Tom',
+    gender: 'male'
+};
+```
+
+使用 `[propName: string]` 定义了任意属性取 `string` 类型的值。
+
+
+
+⚠️
+
+需要注意的是，**一旦定义了任意属性，那么确定属性和可选属性的类型都必须是它的类型的子集**：
+
+```ts
+interface Person {
+    name: string;
+    age?: number;
+    [propName: string]: string;
+}
+
+let tom: Person = {
+    name: 'Tom',
+    age: 25,
+    gender: 'male'
+};
+
+// index.ts(3,5): error TS2411: Property 'age' of type 'number' is not assignable to string index type 'string'.
+// index.ts(7,5): error TS2322: Type '{ [x: string]: string | number; name: string; age: number; gender: string; }' is not assignable to type 'Person'.
+//   Index signatures are incompatible.
+//     Type 'string | number' is not assignable to type 'string'.
+//       Type 'number' is not assignable to type 'string'.
+```
+
+上例中，任意属性的值允许是 `string`，但是可选属性 `age` 的值却是 `number`，`number` 不是 `string` 的子属性，所以报错了。
+
+
+
+
+
+
+
 ▼Interface可以继承:
 
 ```ts
@@ -1015,6 +1068,31 @@ if (value === Direction.Up) {
     console.log('go up!');
 }
 ```
+
+
+
+
+
+More:
+
+```typescript
+enum Direction {
+  Up = 1,
+  Down,
+  Left,
+  Right
+}
+```
+
+我们定义了一个数字枚举， `Up`使用初始化为 `1`。 其余的成员会从 `1`开始自动增长。 换句话说， `Direction.Up`的值为 `1`， `Down`为 `2`， `Left`为 `3`， `Right`为 `4`
+
+ <img src="TS基础.assets/image-20211007162847355.png" alt="image-20211007162847355" style="zoom:65%;" />
+
+
+
+💎 可以看出来：不带有初始化器且之前的枚举成员是一个 *数字*常量。 这种情况下，当前枚举成员的值为它上一个枚举成员的值加1。
+
+
 
 
 

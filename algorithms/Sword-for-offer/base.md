@@ -2407,13 +2407,13 @@ var reverseList = function(head) {
 最简洁的模式
 
 ```js
-var reverseList = function(head) {
-    let pre=null,cur=head;
-    while(cur){
-        //解构赋值也有执行顺序!!!
-        [pre,cur.next,cur]=[cur,pre,cur.next];
-    }
-    return pre;
+const reverseList = function(head) {
+  let pre=null,cur=head;
+  while(cur){
+    //解构赋值也有执行顺序!!!
+    [pre,cur.next,cur]=[cur,pre,cur.next];
+  }
+  return pre;
 };
 ```
 
@@ -2442,6 +2442,160 @@ const reverseList = (head) => {
 ```
 
 不过这里的思想和上面的 最简洁的模式一样，而且上面更简单
+
+
+
+
+
+##### 扩展：[92. 反转链表 II](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
+
+难度中等1035
+
+给你单链表的头指针 `head` 和两个整数 `left` 和 `right` ，其中 `left <= right` 。请你反转从位置 `left` 到位置 `right` 的链表节点，返回 **反转后的链表** 。
+
+ 
+
+**示例 1：**
+
+![img](base.assets/rev2ex2.jpg)
+
+```
+输入：head = [1,2,3,4,5], left = 2, right = 4
+输出：[1,4,3,2,5]
+```
+
+**示例 2：**
+
+```
+输入：head = [5], left = 1, right = 1
+输出：[5]
+```
+
+ 
+
+**提示：**
+
+- 链表中节点数目为 `n`
+- `1 <= n <= 500`
+- `-500 <= Node.val <= 500`
+- `1 <= left <= right <= n`
+
+ 
+
+**进阶：** 你可以使用一趟扫描完成反转吗？
+
+
+
+对于链表题，光靠脑子想容易乱，一定要**画图**
+
+其实这道题，就是两步骤:
+
+1. 待反转的区间内两两一翻转
+2. 然后进行连接，让 **left 的前置节点**指向 right ，left 节点指向 **right 的后置节点**。
+
+![Image](base.assets/640)
+
+整体思路就是这样，接下来就是边界问题。
+
+由于我们会用到 left 的前置节点，
+
+如果 left 为 1 ，left 是没有前置节点的，
+
+为了减少特殊判断，我们引入**虚拟头节点**，
+
+这样，哪怕题目要求反转整个 1->2->3->4->5，我们也能用上面的步骤的做。
+
+
+
+![Image](base.assets/640-20210923110926954)
+
+解决完边界问题，又有个新的问题，
+
+想想步骤 1 需要执行几次翻转操作？
+
+举个例子数一下就是了，图 1 中 left = 2, right = 4， 一共反转了 2 次（图中一共 2 个红色指针），
+
+因此，就有 步骤 1 需要执行 `right - left` 次反转操作。
+
+**凡是遇到这种需要计算的，我都会举个例子算一下，然后得到公式。**
+
+
+
+<span style='color:red;font-weight:bold;'>⚠️这里的left和right都是以1为起始而不是0</span>
+
+```js
+/**
+ * @param {ListNode} head
+ * @param {number} left
+ * @param {number} right
+ * @return {ListNode}
+ */
+function ListNode(val, next) {
+  this.val = (val===undefined ? 0 : val)
+  this.next = (next===undefined ? null : next)
+}
+const reverseBetween = function(head, left, right) {
+  const dummyHead = new ListNode(0)
+  dummyHead.next = head
+  let index = 0, cur = dummyHead
+  // 1.得到left位置的前置节点并赋值为pHead
+  while (index++ < left - 1) cur = cur.next
+  let pHead = cur, prev = cur.next // prev为left位置的节点
+  cur = cur.next.next
+  // 2.进行right-left次反转 index = left
+  while (index++ < right) {
+    [prev, cur.next, cur] = [cur, prev, cur.next]
+  }
+  // 3.进行连接 此时prev为right， cur为right.next
+  pHead.next.next = cur
+  pHead.next = prev
+  return dummyHead.next
+};
+```
+
+
+
+这种写法看着简便，实际上却难懂还复杂（自己写的。。）不如写的易懂一点
+
+```js
+const reverseBetween = function(head, left, right) {
+  const dummyHead = new ListNode(0)
+  dummyHead.next = head
+  let pre = dummyHead
+  // 1. 得到left处的前置节点 pre.next=left
+  for (let i = 0; i < left - 1; i++) {
+    pre = pre.next
+  }
+  let preHead = pre, cur=pre.next.next
+  pre = pre.next
+
+  // 2. 进行right-left次反转
+  for (let i = left; i < right; i++) {
+    [pre, cur.next, cur]=[cur, pre, cur.next]
+  }
+
+  // 3. 进行反转后的连接 pre=>right cur=>right.next
+  preHead.next.next = cur
+  preHead.next = pre
+
+  return dummyHead.next
+};
+```
+
+
+
+其实也差不多。。 这里一定要注意反转链表时的顺序！  
+
+* [pre, cur.next, cur]=[cur, pre, cur.next] ，cur.next要在cur前面
+* preHead.next.next = cur  要在 preHead.next = pre 前面
+
+
+
+
+
+
+
+
 
 
 

@@ -2969,8 +2969,6 @@ useEffect(() => {
 
 e.g.1  配合useEffect
 
-
-
 ```jsx
 // 用于记录 getData 调用次数
 let count = 0;
@@ -3028,8 +3026,6 @@ function Child({val, getData}) {
   return <div>{val}</div>;
 }
 ```
-
-
 
 此时模拟的网络请求getData会被反复调用，然而我们本意是在getData不变化的情况下只调用一次！
 
@@ -3318,8 +3314,8 @@ const dispense = candy => {
 
 ```diff
 const dispense = candy => {
-    setCandies(allCandies => allCandies.filter(c => c !== candy))
-  }
+  setCandies(allCandies => allCandies.filter(c => c !== candy))
+}
 + const dispenseCallback = React.useCallback(dispense, [])
 ```
 
