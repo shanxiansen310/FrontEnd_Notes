@@ -1187,8 +1187,7 @@ console.log(queue.pop().toFixed())
 
 ❌ 无法保证push和pop的数据类型一致!
 
-❗上述代码可以 tsc 编译无错误, 但是 ts-node执行时就会报错, 比如:  error TS7006: Parameter 'item' implicitly has an 'any' type;  error TS2345: Argument of type 'any' is not assignable to parameter of t
-ype 'never'. 等等! (ts-node貌似更严格一些);  并且对于   <span style="color:blue;">queue.pop().toFixed()</span>  还会报错  <span style=" color:red;">error TS2532: Object is possibly 'undefined'.</span>
+❗上述代码可以 tsc 编译无错误, 但是 ts-node执行时就会报错, 比如:  error TS7006: Parameter 'item' implicitly has an 'any' type;  error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'. 等等! (ts-node貌似更严格一些);  并且对于   <span style="color:blue;">queue.pop().toFixed()</span>  还会报错  <span style=" color:red;">error TS2532: Object is possibly 'undefined'.</span>
 
 
 
@@ -1417,8 +1416,14 @@ document.addEventListener('click', (e) => {
 
 Typescript 还提供了一些功能性，帮助性的类型，这些类型，大家在 js 的世界是看不到的，这些类型叫做 utility types，提供一些简洁明快而且非常方便的功能。
 
+Utility Types用法：使用泛型给它穿入一个其它类型，然后 utility types对这个类型进行某种操作
+
+
+
+##### Partial
+
 ```ts
-// partial，它可以把传入的类型都变成可选
+// Partial，它可以把传入的类型都变成可选
 interface IPerson {
   name: string
   age: number
@@ -1428,6 +1433,18 @@ let viking: IPerson = { name: 'viking', age: 20 }
 type IPartial = Partial<IPerson>
 let viking2: IPartial = { }
 
+// Partial的实现
+type Partial<T> = { 
+  [P in keyof T]?: T[P] 
+};
+
+```
+
+
+
+##### Omit
+
+```tsx
 // Omit，它返回的类型可以忽略传入类型的某个属性
 
 type IOmit = Omit<IPerson, 'name'>
@@ -1436,9 +1453,58 @@ let viking3: IOmit = { age: 20 }
 
 
 
+##### Pick
+
+Constructs a type by picking the set of properties `Keys` (string literal or union of string literals) from `Type`.
+
+```ts
+interface Todo {
+  title: string;
+  description: string;
+  completed: boolean;
+}
+ 
+type TodoPreview = Pick<Todo, "title" | "completed">;
+ 
+const todo: TodoPreview = {
+  title: "Clean room",
+  completed: false,
+};
+ 
+todo;
+```
+
+简单来说就是从一堆属性中选取自己想要的属性
 
 
 
+
+
+##### Parameters
+
+```tsx
+// Parameters： Constructs a tuple type from the types used in the parameters of a function type
+
+declare function f1(arg: { a: number; b: string }): void;
+ 
+type T0 = Parameters<() => string>;
+     
+type T0 = []
+type T1 = Parameters<(s: string) => void>;
+     
+type T1 = [s: string]
+type T2 = Parameters<<T>(arg: T) => T>;
+     
+type T2 = [arg: unknown]
+type T3 = Parameters<typeof f1>;
+     
+type T3 = [arg: {
+    a: number;
+    b: string;
+}]
+```
+
+以这里的 type T3说明 <span style='color:blue;'>Parameters\<typeof f1\></span>，也就是我们 typeof 后面跟一个函数，这会检测到该函数的参数类型！
 
 
 
@@ -1500,9 +1566,149 @@ const foo = (foo: string) => {
 
 
 
+### Tips
 
 
 
 
 
 
+
+#### unknown和any的区别
+
+unknown 和 any 的主要区别是 unknown 类型会更加严格：在对 unknown 类型的值执行大多数操作之前，我们必须进行某种形式的检查。而在对 any 类型的值执行操作之前，我们不必进行任何检查。
+
+```ts
+let foo: any = 123;
+console.log(foo.msg); // 符合TS的语法
+let a_value1: unknown = foo;   // OK
+let a_value2: any = foo;      // OK
+let a_value3: string = foo;   // OK
+
+
+let bar: unknown = 222; // OK 
+console.log(bar.msg); // Error
+let k_value1: unknown = bar;   // OK
+let K_value2: any = bar;      // OK
+let K_value3: string = bar;   // Error
+```
+
+因为bar是一个未知类型(任何类型的数据都可以赋给 unknown 类型)，所以不能确定是否有msg属性。不能通过TS语法检测；而 unkown 类型的值也不能将值赋给 any 和 unkown 之外的类型变量
+
+<div style="background-color: #fff7d3; border-left: 10px solid #ffe564;padding: 10px;">    <h5>总结： any 和 unknown 都是顶级类型，但是 unknown 更加严格，不像 any 那样不做类型检查，反而 unknown 因为未知性质，不允许访问属性，不允许赋值给其他有明确类型的变量</h5>    <span></span></div>
+
+
+
+⚠️<span style='color:red;font-weight:bold;'>不允许访问属性</span> 
+
+⚠️<span style='color:red;font-weight:bold;'>不允许赋值给其他有明确类型的变量</span>
+
+
+
+##### 联合类型中的 unkown
+
+在联合类型中，unknown 类型会吸收任何类型。这就意味着如果任一组成类型是 unknown，联合类型也会相当于 unknown
+
+
+
+```ts
+type UnionType1 = unknown | null;       // unknown
+type UnionType2 = unknown | undefined;  // unknown
+type UnionType3 = unknown | string;     // unknown
+type UnionType4 = unknown | number[];   // unknown
+```
+
+意外是 any 类型。如果至少一种组成类型是 any，联合类型会相当于 any
+
+```ts
+type UnionType5 = unknown | any;  // any
+```
+
+
+
+##### 交叉类型中的 unkown
+
+```ts
+type IntersectionType1 = unknown & null;       // null
+type IntersectionType2 = unknown & undefined;  // undefined
+type IntersectionType3 = unknown & string;     // string
+type IntersectionType4 = unknown & number[];   // number[]
+type IntersectionType5 = unknown & any;        // any
+```
+
+由于每种类型都可以赋值给 unknown 类型，所以在交叉类型中包含 unknown 不会改变结果。我们将只剩下 string 类型。
+
+
+
+▼那如何将 unknown 类型指定为一个更具体的类型呢？
+
+- 使用 typeof 进行类型判断（这些缩小类型范围的技术都有助于TS基于控制流程下的类型分析）
+
+```ts
+  function unknownToString(value: unknown): string {
+    if (typeof value === "string") {
+     return value;
+    }
+  
+    return String(value);
+  }
+```
+
+
+
+- 对 unknown 类型使用类型断言
+   要强制编译器信任类型为 unknown 的值为给定类型，则可以使用类型断言：
+
+```ts
+  const value: unknown = "Hello World";
+  const foo: string = value; // Error
+  const bar: string = value as string; // OK
+```
+
+
+
+断言错了时语法能通过检测，但是运行的时候就会报错了！
+
+```ts
+  const value: unknown = "Hello World";
+
+  const bar: number = value as number; // runtime Error
+```
+
+
+
+
+
+#### ts面向接口编程
+
+
+
+我们用一个extends的例子来说明：
+
+```tsx
+interface Base {
+  id: number
+}
+interface Advance extends Base {
+  name: string
+}
+const test = (param: Base) => {}
+```
+
+
+
+```ts
+const a: Advance = { id: 1, name: 'riki'}
+test(a)   ✅
+```
+
+这样是正确的，因为Advance继承了Base，因此a拥有Base的属性，所以可以在test函数中作为参数！
+
+
+
+```tsx
+const a = { id: 1, name: 'riki'}
+test(a)   ✅
+```
+
+这样也是正确的！ts不像java面向对象编程，而是面向接口。 这里观察到 a 中包含了Base接口中的属性，因此也不会报错！

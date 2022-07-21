@@ -452,6 +452,8 @@ const Child = (() =>{
 
 
 
+
+
 ##### 使用funtion作为入参
 
 
@@ -587,7 +589,7 @@ const [initialState, setState] = useState(() => ({
 
 
 
-setCount，setCount其实可以传入表达式，也可以传入一个函数，例如这样：
+setCount其实可以传入表达式，也可以传入一个函数，例如这样：
 
 ```jsx
 // 传入表达式
@@ -1143,6 +1145,12 @@ function FriendStatus(props) {
 
 🤔️ 什么时候开始清除？
 
+> **When exactly does React clean up an effect?** React performs the cleanup when the component unmounts. However, as we learned earlier, effects run for every render and not just once. **This is why React *also* cleans up effects from the previous render before running the effects next time.**
+
+<span style='color:red;font-weight:bold;'>官方文档：React *会*在执行当前 effect 之前对上一个 effect 进行清除。</span>
+
+
+
 ➡️ React 会在组件卸载的时候执行清除操作。这种解绑的模式跟componentWillUnmount不一样。componentWillUnmount只会在组件被销毁前执行一次而已，而 <span style='color:red;font-weight:bold;'>useEffect里的函数，每次组件渲染后都会执行一遍，包括副作用函数返回的这个清理函数也会重新执行一遍。</span> 
 
 其每次渲染和清除：
@@ -1442,7 +1450,10 @@ useEffect(() => {
 
 
 
-这里可以使用闭包来理解！setInterval 中的函数声明的时候，因为用到了外部变量，所以会 binding 声明时的 count 值。导致其作用域链上的变量count始终为0！
+<div style="background-color: #fff7d3; border-left: 10px solid #ffe564;padding: 10px;">
+    <h5>⭐️</h5>
+    <span>这里可以使用闭包来理解！setInterval 中的函数声明的时候，因为用到了外部变量，所以会 binding 声明时的 count 值。导致其作用域链上的变量count始终为0！</span>
+</div> 
 
 
 
@@ -1458,7 +1469,39 @@ useEffect(() => {
 
 
 
+4.useEffect依赖导致的无限循环问题
 
+```tsx
+import React, { useEffect, useState } from "react";
+import "./styles.css";
+
+export default function App() {
+  // 当obj是基本类型的时候，就不会无限循环
+  // 当 obj是对象的时候，就会无限循环
+  // 当 obj 是对象的state时，不会无限循环
+  const [obj, setObj] = useState({ name: "Jack" });
+  // const obj = 1;
+  // const obj = {name: 'Jack'}
+  const [num, setNum] = useState(0);
+
+  useEffect(() => {
+    console.log("effect");
+    setNum(num + 1);
+  }, [obj]);
+
+  return (
+    <div className="App">
+      {num}
+      <h1>Hello CodeSandbox</h1>
+      <h2>Start editing to see some magic happen!</h2>
+    </div>
+  );
+}
+```
+
+
+
+>因此在useEffect中，绝不可以使用非状态的对象作为依赖，因为每次组件更新后，该对象的地址都会发生改变，最终导致不停地的调用useEffect。但是可以使用常量和状态对象作为依赖，因为状态对象在组建更新后并不会改变，除非调用setState改变。
 
 
 
@@ -1473,8 +1516,6 @@ useEffect(() => {
 #### why
 
 当需要存放一个数据，需要无论在哪里都取到最新状态时，需要使用 useRef。
-
-
 
 ```jsx
 function SomeComponent() {
@@ -1541,14 +1582,16 @@ function SomeComponent() {
 const [count, setCount] = useState(0)
 const countRef = useRef(0)
 useEffect(() => {
-  console.log('use effect...',count)
   const timer = setInterval(() => {
     console.log('timer...count:', countRef.current)
+    console.log('use effect...',count)
     setCount(++countRef.current)
   }, 1000)
   return ()=> clearInterval(timer)
 },[])
 ```
+
+🚀这里的count每次console依旧是 0，但countRef.current 会改变！
 
 
 
@@ -2014,9 +2057,13 @@ useMemo的作用：
 
 
 
+
+
+
+
+
+
 2.useMemo 和 React.memo
-
-
 
 
 
@@ -2428,8 +2475,6 @@ const [state, dispatch] = useReducer(reducer, initialArg, init);
 
 
 
-
-
 一个简单的计数器例子：
 
 ```jsx
@@ -2475,6 +2520,98 @@ useReucer有以下优点：
 3、组件树较大时，可以通过创建context上下文，用useReucer向下传递dispatch函数。
 
 
+
+##### useUndo例子
+
+```ts
+const UNDO = 'UNDO'
+const REDO = 'REDO'
+const SET = 'SET'
+const RESET = 'RESET'
+
+type State<T> = {
+  past: T[]; // 存放历史值
+  present: T; // 当前值
+  future: T[]; // 存放undo值，用于取消撤销
+}
+
+type Action<T> = {
+  newPresent?: T;
+  type: typeof UNDO | typeof REDO | typeof SET | typeof RESET;
+}
+
+const undoReducer = <T>(state: State<T>, action: Action<T>) => {
+  const { past, present, future } = state;
+  const {newPresent} = action
+  switch (action.type) {
+    case UNDO:
+      if (past.length === 0) return state;
+      const previous = past[past.length - 1];
+      const newPast = past.slice(0, past.length - 1);
+      return {
+        past: newPast,
+        present: previous,
+        future: [present, ...future],
+      };
+    case REDO:
+      if (future.length === 0) return state;
+      const next = future[0];
+      const newFuture = future.slice(1);
+      return {
+        past: [...past, present],
+        present: next,
+        future: newFuture,
+      };
+    case SET:
+      if (newPresent === present) return state;
+      return {
+        past: [...past, present],
+        present: newPresent,
+        future: [],
+      };
+    case RESET:
+      return {
+        past: [],
+        present: newPresent,
+        future: [],
+      };
+    default:
+      return state
+  }
+}
+export const useUndo = <T>(initialPresent: T) => {
+  const [state, dispatch] = useReducer(undoReducer, {
+    past: [],
+    present: initialPresent,
+    future: [],
+  } as State<T>)
+
+  const canUndo = state.past.length !== 0;
+  const canRedo = state.future.length !== 0;
+
+  /**
+   * 撤销
+   */
+  const undo = useCallback(() => {dispatch({type: UNDO})}, []);
+
+  /**
+   * 取消撤销
+   */
+  const redo = useCallback(() => {dispatch({type: REDO})}, []);
+
+  /**
+   * 指定为特定值
+   */
+  const set = useCallback((newPresent: T) => {dispatch({type: SET, newPresent: newPresent})}, []);
+
+  /**
+   * 重置为初始值
+   */
+  const reset = useCallback(() => {dispatch({type: RESET, newPresent: initialPresent})}, [initialPresent]);
+
+  return [state, { undo, redo, set, reset, canUndo, canRedo }] as const;
+};
+```
 
 
 
@@ -3117,7 +3254,7 @@ function App() {
 
 ##### 场景二
 
-以来state的useCallback
+使用了state的useCallback
 
 
 
@@ -3357,6 +3494,165 @@ function Blub() {
 
 - 函数`定义`时需要进行大量运算， 这种场景极少
 - 需要比较引用的场景，如上文提到的`useEffect`，又或者是配合`React.Memo`使用：
+- 如果我们需要传出自己自定义的函数的话，最好加上useCallback，以免别人使用的时候造成了无限循环渲染
+
+
+
+
+
+
+
+#### 在组件中保存函数
+
+
+
+一开始可能会想到采用useState来保存函数，但是会出现问题⚠️
+
+在React官方文档中，直接给 useState 传入函数是一种惰性初始化的行为
+
+https://reactjs.org/docs/hooks-reference.html#lazy-initial-state
+
+
+
+The `initialState` argument is the state used during the initial render. In subsequent renders, it is disregarded. If the initial state is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render:
+
+```tsx
+const [state, setState] = useState(() => {
+  const initialState = someExpensiveComputation(props);
+  return initialState;
+});
+```
+
+⭐️也就是说在useState中直接传入函数并不是保存函数，而是一种避免重复进行复杂计算小号性能的方法
+
+<iframe src="https://codesandbox.io/embed/usestateduo-xing-chu-shi-hua-bwo5kn?fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="useState惰性初始化"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+在这个例子中我们可以看见，明明只是传进了一个函数并没有执行，但依然会log出来，这就是React在useState时就对函数进行了执行，也就是惰性初始化！
+
+
+
+那么我们如何采用 useState来保存函数呢？
+
+
+
+##### 使用useState保存函数
+
+从上面的示例我们可以看出虽然传入的是一个函数，但是state的值却是传入的函数返回的值。既然这样我们可以使该函数也返回一个函数
+
+<iframe src="https://codesandbox.io/embed/dazzling-haze-l8usk2?fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="dazzling-haze-l8usk2"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+```tsx
+export default function App() {
+  const [callback, setCallback] = React.useState(() => () => {
+    console.log("i am lazy");
+  });
+
+  console.log(callback);
+
+  return (
+    <div className="App">
+      <button
+        onClick={() =>
+          setCallback(() => () => {
+            console.log("update");
+          })
+        }
+      >
+        setCallback
+      </button>
+      <button onClick={callback}>callback</button>
+    </div>
+  );
+}
+```
+
+现在就可以很好的保存函数了！
+
+
+
+
+
+当然不止useState，我们还可以
+
+
+
+##### 使用useRef保存函数
+
+
+
+<iframe src="https://codesandbox.io/embed/userefbao-cun-han-shu-coz8ju?fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="useRef保存函数"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+```tsx
+export default function App() {
+  const callbackRef = React.useRef(() => alert("init"));
+  const callback = callbackRef.current;
+  console.log(callback);
+
+  return (
+    <div className="App">
+      <button
+        onClick={() => {
+          callbackRef.current = () => alert("update");
+        }}
+      >
+        setCallback
+      </button>
+      <button onClick={() => callback()}>callback</button>
+    </div>
+  );
+}
+```
+
+
+
+这里需要注意，在重新调用的时候需要这么写
+
+```react
+<button onClick={() => callback()}>callback</button>
+```
+
+```tsx
+<button onClick={() => callbackRef.current()}>callback</button>
+```
+
+而不是这样：❌
+
+```tsx
+<button onClick={callback}>callback</button>
+```
+
+```tsx
+<button onClick={callbackRef.current}>callback</button>
+```
+
+如果采用第二种写法他不会使用更新后的值，因为callback一早就被定义，会采用最初定义了的值的地址，但如果采用函数形式就会获取到最新值！
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
