@@ -696,6 +696,7 @@ class Counter extends React.Component {
 
 
 
+
 这也可以说是useState异步回调的问题！
 
 当使用useState对数据进行更新，并不能立刻获取到最新的数据。
@@ -754,12 +755,49 @@ function BadComponent() {
 
 这什么意思呢？ 就是说 useState只会调用一次，如果后续想变更state只能通过useState返回的更新函数来进行更新！
 
+```tsx
+import * as ReactDOM from "react-dom";
+import React, { useState, useEffect } from "react";
+
+const Child = ({ data }) => {
+  console.log("child render...", data);
+  const [name, setName] = useState(data);
+  return (
+    <div>
+      <div>child</div>
+      <div>
+        {name} --- {data}
+      </div>
+    </div>
+  );
+};
+
+const Hook = () => {
+  console.log("Hook render...");
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState("rose");
+
+  return (
+    <div>
+      <div>{count}</div>
+      <button onClick={() => setCount(count + 1)}>update count </button>
+      <button onClick={() => setName("jack")}>update name </button>
+      <Child data={name} />
+    </div>
+  );
+};
+```
+
+
+
 <iframe src="https://codesandbox.io/embed/aged-leftpad-wv6gg?fontsize=14&hidenavigation=1&theme=dark"
      style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
      title="aged-leftpad-wv6gg"
      allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
+
+
 
 
 
@@ -773,9 +811,9 @@ function BadComponent() {
 
 
 
+###### 3.useState的更新函数是赋值给一个新的变量
 
-
-<span style='color:red;'>3.useState的更新函数不是在原来的对象上进行修改而是赋值给一个新的变量！</span>
+<span style='color:red;'>useState的更新函数不是在原来的对象上进行修改而是赋值给一个新的变量！</span>
 
 
 
@@ -1005,7 +1043,7 @@ class Example extends React.Component {
 
 😈**在这个 class 中，我们需要在两个生命周期函数中编写重复的代码。**
 
-这是因为很多情况下，我们希望在组件加载和更新时执行同样的操作。从概念上说，我们希望它在每次渲染之后执行 —— 但 React 的 class 组件没有提供这样的方法。即使我们提取出一个方法，我们还是要在两个地方调用它。
+这是因为很多情况下，我们希望在组件加载和更新时执行同样的操作。从概念上说，==我们希望它在每次渲染之后执行== —— 但 React 的 class 组件没有提供这样的方法。即使我们提取出一个方法，我们还是要在两个地方调用它。
 
 
 
@@ -1071,9 +1109,7 @@ class Example extends React.Component {
 
 
 
-有时候，我们只想**在 React 更新 DOM 之后运行一些额外的代码。**比如发送网络请求，手动变更 DOM，记录日志，这些都是常见的无需清除的操作。因为我们在执行完这些操作之后，就可以忽略他们了
-
-
+有时候，我们只想**在 React 更新 DOM 之后运行一些额外的代码。**比如发送网络请求，手动变更 DOM，记录日志，这些都是常见的无需清除的操作。因为我们在执行完这些操作之后，就可以忽略他们了。
 
 ```jsx
 function Example() {
@@ -1087,7 +1123,9 @@ function Example() {
 
 
 
+🚀这种情况useEffect会在组件第一次render和每次update之后都去执行！
 
+**Does `useEffect` run after every render?** Yes! By default, it runs both after the first render *and* after every update.
 
 
 
@@ -1147,7 +1185,7 @@ function FriendStatus(props) {
 
 > **When exactly does React clean up an effect?** React performs the cleanup when the component unmounts. However, as we learned earlier, effects run for every render and not just once. **This is why React *also* cleans up effects from the previous render before running the effects next time.**
 
-<span style='color:red;font-weight:bold;'>官方文档：React *会*在执行当前 effect 之前对上一个 effect 进行清除。</span>
+<span style='color:red;font-weight:bold;'>官方文档：React 会在执行当前 effect 之前对上一个 effect 进行清除。</span>
 
 
 
@@ -1872,6 +1910,7 @@ const ChangeNum = () => {
 
 
 
+
 当不断点击按钮时，num和refFromCreateRef值一直在+1，而中间的refFromUseRef却没有改变。
 
 可以看出，createRef每次都创建了一个新的引用，因此数值会改变，而useRef每次的引用都是相同的，无论怎么变化，都不会改变其current的值。
@@ -2258,6 +2297,7 @@ const Hook =()=>{
 
 
 
+
 因此我们要使用 useCallback来解决这个问题！
 
 
@@ -2302,6 +2342,8 @@ const onChange=useCallback((e)=>{
 
 
 💎关于这里的 dps数组你可以根据你的需要来传递参数，这里传递空数组表示父组件怎么变化都不会出发Child子组件的重新渲染。 但如果你想要通过用户输入在Child组件中进行操作，可以传入 $[text]$
+
+[useCallback使用场景](#useCallback使用场景)
 
 
 
@@ -3164,7 +3206,14 @@ function Child({val, getData}) {
 }
 ```
 
-此时模拟的网络请求getData会被反复调用，然而我们本意是在getData不变化的情况下只调用一次！
+此时模拟的网络请求getData会被反复调用（因为每次setVal之后组件re-render之后getData就会崇信定义一次，因此re-render之后的getData和之前的getData虽然内容一模一样但并不是同一个object❗️），然而我们本意是在getData不变化的情况下只调用一次！
+
+<iframe src="https://codesandbox.io/embed/adoring-wozniak-mt33iw?fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="getData无限调用"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
 
 ps：为什么getData会变化，useEffect依赖中需要加入getData❓
 
@@ -3646,9 +3695,200 @@ export default function App() {
 
 
 
+#### React和Vue关于useState一致性的对比
+
+下面这段代码按照依次循环点击‘click me’、‘show’按钮后，虽然有setTimeout延时操作，但是在react中会打印出1 2 3，而在vue中会打印出3 3 3，这是为什么呢？（借此更加深刻的理解下useState）
+
+```tsx
+ export default function App() {
+   const [count, setCount] = useState(0)
+ 
+   function alert() {
+     setTimeout(() => {
+       console.log("You have clicked "+count+' times');
+     }, 3000)
+   }
+ 
+   return (
+     <div className="App">
+       <h1>You have clicked {count} times</h1>
+       <button onClick={()=>setCount(count+1)}>click me</button>
+       <button onClick={alert}>show</button>
+     </div>
+   );
+ }
+```
+
+ ![image-20220801160938271](https://image-list-1258374833.cos.ap-chengdu.myqcloud.com/image-20220801160938271.png)
 
 
 
+为什么在3s后React输出的还是之前对应的值呢？因为在你setState的时候已经re-render更新了这个变量，你接下来调用alert函数的时候获取的是最新值了！（注意无法获取到setState后的最新值是给setState传函数的情况，详情👉🏻  link）
+
+其实这个理解起来不难，主要是讲讲为什么要这么去设计？[Vue和React的这个行为各是出于什么考虑？ - 知乎 (zhihu.com)](https://www.zhihu.com/question/543057656/answer/2575930077)
+
+##### useRef实现
+
+此外，如果我们想使用Hooks API实现Class API（or Vue）的行为，可以直接使用useRef
+
+```tsx
+ export default function App() {
+   const [count, setCount] = useState(0);
+ 
+   const countRef = useRef(count)
+   countRef.current = count
+ 
+   function alert() {
+     setTimeout(() => {
+       console.log("You have clicked " + count + " times");
+       console.log(countRef.current)
+     }, 3000);
+   }
+ 
+   return (
+     <div className="App">
+       <h1>You have clicked {count} times</h1>
+       <button onClick={() => setCount(count + 1)}>click me</button>
+       <button onClick={alert}>show</button>
+     </div>
+   );
+ }
+```
+
+此时就会变成这样：
+
+ ![](https://image-list-1258374833.cos.ap-chengdu.myqcloud.com/(null)-20220722154430480-20220801161106345.png)
+
+**注意⚠️**
+
+这里Ref和State其实是绑定了的，但是在异步状态下state会对应之前的值，而ref会得到最新值！
+
+
+
+##### 函数式组件与类组件的区别
+
+[函数式组件与类组件有何不同？ — Overreacted](https://overreacted.io/zh-hans/how-are-function-components-different-from-classes/)
+
+[How Are Function Components Different from Classes? — Overreacted](https://overreacted.io/how-are-function-components-different-from-classes/)
+
+
+
+```tsx
+function ProfilePage(props) {
+  const showMessage = () => {
+    alert('Followed ' + props.user);
+  };
+
+  const handleClick = () => {
+    setTimeout(showMessage, 3000);
+  };
+
+  return (
+    <button onClick={handleClick}>Follow</button>
+  );
+}
+```
+
+
+
+```tsx
+class ProfilePage extends React.Component {
+  showMessage = () => {
+    alert('Followed ' + this.props.user);
+  };
+
+  handleClick = () => {
+    setTimeout(this.showMessage, 3000);
+  };
+
+  render() {
+    return <button onClick={this.handleClick}>Follow</button>;
+  }
+}
+```
+
+- 当使用 **函数式组件** 实现的 `ProfilePage`, 当前账号是 Dan 时点击 Follow 按钮，然后立马切换当前账号到 Sophie，弹出的文本将依旧是 `'Followed Dan'`。
+- 当使用 **类组件** 实现的 `ProfilePage`, 弹出的文本将是 `'Followed Sophie'`：
+
+![Demonstration of the steps](https://raw.githubusercontent.com/shanxiansen310/picgo/main/bug-20220802174009686.gif)
+
+
+
+在类组件中，类方法从 `this.props.user` 中读取数据。在 React 中 Props 是不可变(immutable)的，所以他们永远不会改变。**然而，`this`是，而且永远是，可变(mutable)的。**
+
+事实上，这就是类组件 `this` 存在的意义。React本身会随着时间的推移而改变，以便你可以在渲染方法以及生命周期方法中得到最新的实例。
+
+所以如果在请求已经发出的情况下我们的组件进行了重新渲染，`this.props`将会改变。`showMessage`方法从一个“过于新”的`props`中得到了`user`。
+
+
+
+我们如何在class组件中去读取到正确的值呢？ => 去捕获特定的那一次渲染所使用的props和state
+
+```tsx
+class ProfilePage extends React.Component {
+  render() {
+    // Capture the props!
+    const props = this.props;
+
+    // Note: we are *inside render*.
+    // These aren't class methods.
+    const showMessage = () => {
+      alert('Followed ' + props.user);
+    };
+
+    const handleClick = () => {
+      setTimeout(showMessage, 3000);
+    };
+
+    return <button onClick={handleClick}>Follow</button>;
+  }
+}
+```
+
+ ![Capturing Pokemon](https://raw.githubusercontent.com/shanxiansen310/picgo/main/pokemon-20220802175908148.gif)
+
+
+
+如果我们想使用Hooks来实现获取最新值，参考前面的 [useRef实现](#useRef实现)
+
+
+
+
+
+
+
+
+
+
+
+## Tips
+
+
+
+
+
+#### 1.如何给组件props设置默认值
+
+```tsx
+ import React from 'react'
+ 
+ function About (props) {
+   const { name, age } = props
+     return (
+       <div>
+         <p>{ name }</p>
+         <p>{ age }</p>
+       </div>
+     )
+ }
+ 
+ About.defaultProps = {
+   name: 'ReoNa',
+   age: 22
+ }
+ 
+ export default About
+```
 
 
 

@@ -1,6 +1,8 @@
 
 
-### 一.防抖函数的理解--层层递进
+### 基础JS知识
+
+#### 一.防抖函数的理解--层层递进
 
 
 
@@ -34,7 +36,7 @@ HTML：
 
 
 
-#### 1.基础版
+##### 1.基础版
 
  js:
 
@@ -99,7 +101,7 @@ function count() {
 
 那么如何改进呢? 
 
-#### 2.标准防抖
+##### 2.标准防抖
 
 ```js
 let easyDebounce=(func,wait)=>{
@@ -143,7 +145,7 @@ item.addEventListener('mousemove',easyDebounce(count(param),1000));
 
 
 
-#### 3.防抖Plus
+##### 3.防抖Plus
 
 ```js
 let debounce=function (func,wait){ //箭头函数没有arguments

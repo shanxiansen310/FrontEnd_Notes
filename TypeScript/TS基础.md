@@ -8,7 +8,7 @@
 
 
 
-### 什么是TypeScript?
+### 什么是TypeScript?     
 
  <img src="TS基础.assets/image-20210607230321764.png" alt="image-20210607230321764" style="zoom:70%;" />
 
@@ -1457,6 +1457,17 @@ let viking3: IOmit = { age: 20 }
 
 Constructs a type by picking the set of properties `Keys` (string literal or union of string literals) from `Type`.
 
+```tsx
+/**
+ * From T, pick a set of properties whose keys are in the union K
+ */
+type Pick<T, K extends keyof T> = {
+  [P in K]: T[P];
+};
+```
+
+
+
 ```ts
 interface Todo {
   title: string;
@@ -1482,9 +1493,20 @@ todo;
 
 ##### Parameters
 
-```tsx
-// Parameters： Constructs a tuple type from the types used in the parameters of a function type
 
+
+> Constructs a tuple type from the types used in the parameters of a function type
+
+
+
+```ts
+/**
+ * Obtain the parameters of a function type in a tuple
+ */
+type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never;
+```
+
+```tsx
 declare function f1(arg: { a: number; b: string }): void;
  
 type T0 = Parameters<() => string>;
@@ -1510,11 +1532,11 @@ type T3 = [arg: {
 
 ##### Record
 
-## `Record<Keys, Type>`
 
 
+`Record<Keys, Type>`
 
-Constructs an object type whose property keys are `Keys` and whose property values are `Type`. This utility can be used to map the properties of a type to another type.
+> Constructs an object type whose property keys are `Keys` and whose property values are `Type`. This utility can be used to map the properties of a type to another type.
 
 
 
@@ -1567,7 +1589,7 @@ const result: Record<keys, number> = {
 }
 ```
 
-好吧，其实很简单。千万不要写成下面这样!
+其实很简单。不过千万不要写成下面这样!
 
 ```tsx
 const obj: any = {}

@@ -100,13 +100,66 @@ This div element has a blue text color and a blue border.
 
 
 
+### Image
 
 
 
+#### property
 
 
 
+##### object-fit
+
+控制图片的自适应效果 [object-fit - CSS: Cascading Style Sheets | MDN (mozilla.org)](https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit)
 
 
 
+The **`object-fit`** [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) property sets how the content of a [replaced element](https://developer.mozilla.org/en-US/docs/Web/CSS/Replaced_element), such as an [``](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img) or [``](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video), should be resized to fit its container.
+
+
+
+syntax：
+
+```css
+object-fit: contain;
+object-fit: cover;
+object-fit: fill;
+object-fit: none;
+object-fit: scale-down;
+
+/* Global values */
+object-fit: inherit;
+object-fit: initial;
+object-fit: revert;
+object-fit: revert-layer;
+object-fit: unset;
+```
+
+
+
+Value
+
+- `contain`
+
+  The replaced content is scaled to maintain its aspect ratio while fitting within the element's content box. The entire object is made to fill the box, while preserving its aspect ratio, so the object will be ["letterboxed"](https://en.wikipedia.org/wiki/Letterboxing_(filming)) if its aspect ratio does not match the aspect ratio of the box.
+
+- `cover`
+
+  The replaced content is sized to maintain its aspect ratio while filling the element's entire content box. If the object's aspect ratio does not match the aspect ratio of its box, then the object will be clipped to fit.
+
+- `fill`
+
+  The replaced content is sized to fill the element's content box. The entire object will completely fill the box. If the object's aspect ratio does not match the aspect ratio of its box, then the object will be stretched to fit.
+
+- `none`
+
+  The replaced content is not resized.
+
+- `scale-down`
+
+  The content is sized as if `none` or `contain` were specified, whichever would result in a smaller concrete object size.
+
+
+
+![image-20220801162031514](https://image-list-1258374833.cos.ap-chengdu.myqcloud.com/image-20220801162031514.png)
 

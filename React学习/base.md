@@ -28,7 +28,6 @@ Babel 可以转换 JSX 语法！查看 [React preset](https://babel.docschina.or
 
 ```shell
 npm install --save-dev @babel/preset-react
-Copy
 ```
 
 并将 `@babel/preset-react` 添加到你的 Babel 配置中。
@@ -1908,6 +1907,7 @@ class Calculator extends React.Component {
   on <a href="https://codepen.io">CodePen</a>.
 </iframe>
 
+
 现在无论你编辑哪个输入框中的内容，`Calculator` 组件中的 `this.state.temperature` 和 `this.state.scale` 均会被更新。其中一个输入框保留用户的输入并取值，另一个输入框始终基于这个值显示转换后的结果。
 
 
@@ -3724,7 +3724,45 @@ className={["title", index === this.state.active?"active":null].join(' ')}
 
 　　
 
+
+
+##### classnames
+
 方法三：classnames(需要下载classnames)
+
+官网：[JedWatson/classnames: A simple javascript utility for conditionally joining classNames together](https://github.com/JedWatson/classnames)
+
+
+
+**Usage**
+
+The `classNames` function takes any number of arguments which can be a string or object. The argument `'foo'` is short for `{ foo: true }`. If the value associated with a given key is falsy, that key won't be included in the output.
+
+```tsx
+classNames('foo', 'bar'); // => 'foo bar'
+classNames('foo', { bar: true }); // => 'foo bar'
+classNames({ 'foo-bar': true }); // => 'foo-bar'
+classNames({ 'foo-bar': false }); // => ''
+classNames({ foo: true }, { bar: true }); // => 'foo bar'
+classNames({ foo: true, bar: true }); // => 'foo bar'
+
+// lots of arguments of various types
+classNames('foo', { bar: true, duck: false }, 'baz', { quux: true }); // => 'foo bar baz quux'
+
+// other falsy values are just ignored
+classNames(null, false, 'bar', undefined, 0, 1, { baz: null }, ''); // => 'bar 1'
+```
+
+
+
+Arrays will be recursively flattened as per the rules above:
+
+```tsx
+var arr = ['b', { c: true, d: false }];
+classNames('a', arr); // => 'a b c'
+```
+
+
 
 ```react
 var classNames = require('classnames');
@@ -3741,6 +3779,17 @@ var Button = React.createClass({
   }
 });
 ```
+
+Because you can mix together object, array and string arguments, supporting optional `className` props is also simpler as only truthy arguments get included in the result:
+
+```tsx
+var btnClass = classNames('btn', this.props.className, {
+  'btn-pressed': this.state.isPressed,
+  'btn-over': !this.state.isPressed && this.state.isHovered
+});
+```
+
+
 
 
 
